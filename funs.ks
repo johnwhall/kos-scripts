@@ -160,17 +160,15 @@ function recordIndexByName {
   return -1.
 }
 
+function timeToBurnOutInitialState {
+  return list(time:seconds, lexicon()).
+}
+
 function timeToBurnOut {
-  // First call is just a primer. Wait a bit, then call again.
   // Won't work well when close to burnout because fuel/oxidizer consumption rate
   // tends to trail off rather than abruptly drop to 0.
   parameter resources.
-  parameter state. // pass 0 the first time, then pass the returned value
-
-  if state = 0 {
-    set state to list(time:seconds, lexicon()).
-    wait 0.05. // so we don't divide by dt=0
-  }
+  parameter state.
 
   local timeNow to time:seconds.
   local dt to timeNow - state[0].
@@ -191,5 +189,5 @@ function timeToBurnOut {
     set state[1][r:name] to r:amount.
   }
 
-  return list(shortestBO, state).
+  return shortestBO.
 }
