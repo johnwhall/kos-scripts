@@ -69,6 +69,9 @@ lock hdng to vang(progradeProjection, north:vector).
 local angleProgradeFromHorizon to 0.
 lock angleProgradeFromHorizon to 90 - vang(ship:velocity:orbit, up:vector).
 
+// Limit acceleration (doesn't limit to exactly 5g, but it's close enough)
+lock throttle to max(0, min(1, mass * 5 * 9.82 / max(0.1, maxthrust))).
+
 set igEs to ignitedEngines().
 wait until engineFlamedOut(igEs).
 stage.
