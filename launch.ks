@@ -41,9 +41,11 @@ lock steering to lookdirup(up:vector, ship:facing:topvector).
 wait until ship:verticalspeed > 60.
 
 local initialTurnAngle to 5.
+local launchHeading to 90.
+
 lock steering to smoothScalarBasedTurn(ship:verticalspeed, 60, 80,
-                                       heading(90, 90):vector,
-                                       heading(90, 90 - initialTurnAngle):vector,
+                                       heading(launchHeading, 90):vector,
+                                       heading(launchHeading, 90 - initialTurnAngle):vector,
                                        ship:facing:topvector).
 
 wait until vang(ship:velocity:surface, up:vector) > initialTurnAngle.
@@ -76,8 +78,6 @@ set igEs to ignitedEngines().
 wait until engineFlamedOut(igEs).
 stage.
 wait 3.
-stage.
-wait 8.
 
 // We weren't turning for a while, and the staging might have changed our orientation slightly,
 // so instead of jumping back to the target vector (which we are probably off of a few degrees
@@ -88,16 +88,17 @@ lock steering to smoothScalarBasedTurn(ship:altitude, startAlt, 100000,
                                        ship:facing:topvector).
 
 stage.
+wait 8.
+stage.
 
-local ttboState to initTimeToBurnOut().
-local ttbo to timeToBurnOut(stage:resources, ttboState).
 local lastEcc to ship:orbit:eccentricity.
 local lastETA to eta:apoapsis.
 local lastTime to time:seconds.
 wait 1.
 
 until lastEcc < ship:orbit:eccentricity {
-  local ttbo to timeToBurnOut(stage:resources, ttboState).
+  local dvToCirc to sqrt(body:mu / (body:radius + apoapsis)) - ship:velocity:orbit:mag.
+  local ttcirc to burnTime1(dvToCirc).
 
   print "lastEcc: " + lastEcc.
   print "ship:orbit:eccentricity: " + ship:orbit:eccentricity.
@@ -111,11 +112,11 @@ until lastEcc < ship:orbit:eccentricity {
   local tteta to eta:apoapsis / etaRate.
   print "etaRate: " + etaRate.
   print "tteta: " + tteta.
-  print "ttbo: " + ttbo.
+  print "ttcirc: " + ttcirc.
 
   // for every 1 minute we are short of tteta, raise the nose by 5
   // degrees (or point down if we are accelerating too fast)
-  local offset to 5 * (ttbo - tteta) / 60.
+  local offset to 5 * (ttcirc - tteta) / 60.
   set offset to min(15, max(-15, offset)).
 
   if etaRate < 0 {
