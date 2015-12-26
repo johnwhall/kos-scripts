@@ -1,6 +1,6 @@
 @lazyglobal off.
 
-run funs.
+run once funs.
 
 local throt to 0.
 lock throttle to throt.

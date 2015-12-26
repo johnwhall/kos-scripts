@@ -1,6 +1,6 @@
 @lazyglobal off.
 
-run funs.
+run once funs.
 
 parameter where.
 

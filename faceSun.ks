@@ -1,6 +1,6 @@
 @lazyglobal off.
 
-run funs.
+run once funs.
 
 lock steering to body("Sun"):position:direction.
 wait until faceDiff() < 0.5.

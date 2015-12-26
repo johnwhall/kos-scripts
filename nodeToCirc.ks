@@ -9,7 +9,7 @@ if (where = "per" or where = "peri" or where = "periapsis") {
   exit.
 }
 
-run funs.
+run once funs.
 
 local man to manAt(where).
 

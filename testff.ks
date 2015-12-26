@@ -1,6 +1,6 @@
 @lazyglobal off.
 
-run lib_fuelflow.
+run once lib_fuelflow.
 
 local ffdat to fuelflow_init().
 wait 1.

@@ -1,6 +1,6 @@
 @lazyglobal off.
 
-run funs.
+run once funs.
 
 local vPer to sqrt(body:mu * (2 / (ship:obt:periapsis + body:radius) - 1 / ship:obt:semimajoraxis)).
 local vCirc to sqrt(body:mu / (ship:obt:periapsis + body:radius)).

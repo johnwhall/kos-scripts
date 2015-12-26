@@ -2,7 +2,7 @@
 
 parameter tgtInc.
 
-run funs.
+run once funs.
 
 function calcRealAdjAmtForApo {
   parameter n.

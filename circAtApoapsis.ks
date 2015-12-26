@@ -1,6 +1,6 @@
 @lazyglobal off.
 
-run funs.
+run once funs.
 
 local vApo to sqrt(body:mu * (2 / (ship:obt:apoapsis + body:radius) - 1 / ship:obt:semimajoraxis)).
 local vCirc to sqrt(body:mu / (ship:obt:apoapsis + body:radius)).

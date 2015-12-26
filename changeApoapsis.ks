@@ -3,7 +3,7 @@
 parameter where.
 parameter tgtApo.
 
-run funs.
+run once funs.
 
 local timeToBurnMid to 0.
 if (where = "per" or where = "peri" or where = "periapsis") {
