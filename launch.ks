@@ -78,12 +78,19 @@ stage.
 wait 3.
 stage.
 wait 8.
+
+// We weren't turning for a while, and the staging might have changed our orientation slightly,
+// so instead of jumping back to the target vector (which we are probably off of a few degrees
+// by now), reset the turn.
+set startAlt to ship:altitude.
+lock steering to smoothScalarBasedTurn(ship:altitude, startAlt, 100000,
+                                       ship:velocity:surface, ship:velocity:orbit,
+                                       ship:facing:topvector).
+
 stage.
 
-// TODO: remove?
-wait until ship:altitude > 100000.
-
 local ttboState to initTimeToBurnOut().
+local ttbo to timeToBurnOut(stage:resources, ttboState).
 local lastEcc to ship:orbit:eccentricity.
 local lastETA to eta:apoapsis.
 local lastTime to time:seconds.
@@ -93,36 +100,42 @@ until lastEcc < ship:orbit:eccentricity {
   local ttbo to timeToBurnOut(stage:resources, ttboState).
 
   print "lastEcc: " + lastEcc.
-  print "ship:orbit:eccentricity" + ship:orbit:eccentricity.
+  print "ship:orbit:eccentricity: " + ship:orbit:eccentricity.
   print "lastETA: " + lastETA.
   print "eta:apoapsis: " + eta:apoapsis.
 
-  local dt to lastTime - time:seconds.
+  local dt to time:seconds - lastTime.
   print "dt: " + dt.
 
-  local etaRate to lastETA - eta:apoapsis.
+  local etaRate to (lastETA - eta:apoapsis) / dt.
   local tteta to eta:apoapsis / etaRate.
   print "etaRate: " + etaRate.
   print "tteta: " + tteta.
-
-  local ttbMid to ttbo / 2.
   print "ttbo: " + ttbo.
-  print "ttbMid: " + ttbMid.
 
-  // for every 1 minute we are short of tteta, raise the nose by 3
+  // for every 1 minute we are short of tteta, raise the nose by 5
   // degrees (or point down if we are accelerating too fast)
-  local offset to 3 * (ttbo - tteta) / 60.
-  set offset to min(5, max(-5, offset)).
-  print "offset: " + offset.
-  if eta:apoapsis > 5 {
-    lock steering to lookdirup(heading(hdng, angleProgradeFromHorizon + offset):vector, ship:facing:topvector).
+  local offset to 5 * (ttbo - tteta) / 60.
+  set offset to min(15, max(-15, offset)).
+
+  if etaRate < 0 {
+    set offset to -15.
   }
+
+  print "offset: " + offset.
+
+  local startTime to time:seconds.
+  lock steering to smoothScalarBasedTurn(time:seconds, startTime, startTime + 20,
+                                         ship:facing:vector,
+                                         heading(hdng, angleProgradeFromHorizon + offset):vector,
+                                         ship:facing:topvector).
+
   print "-----------------------------------------------------------------------------".
 
   set lastEcc to ship:orbit:eccentricity.
   set lastETA to eta:apoapsis.
   set lastTime to time:seconds.
-  wait 0.25.
+  wait 0.05.
 }
 
 unlock steering.
