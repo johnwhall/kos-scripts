@@ -119,3 +119,80 @@ function manAt {
   parameter where.
   return node(time:seconds + timeTo1(where), 0, 0, 0).
 }
+
+function ignitedEngines {
+  local ignited to list().
+
+  local es to list().
+  list engines in es.
+
+  for e in es {
+    if (e:ignition) {
+      ignited:add(e).
+    }
+  }
+
+  return ignited.
+}
+
+function elementByName {
+  parameter name.
+  parameter l.
+  for i in l {
+    if i:name = name {
+      return i.
+    }
+  }
+  return 0.
+}
+
+function recordIndexByName {
+  parameter name.
+  parameter l.
+
+  local i to 0.
+  until i >= l:length {
+    if l[i][0] = name {
+      return i.
+    }
+    set i to i + 1.
+  }
+  return -1.
+}
+
+function timeToBurnOut {
+  // First call is just a primer. Wait a bit, then call again.
+  // Won't work well when close to burnout because fuel/oxidizer consumption rate
+  // tends to trail off rather than abruptly drop to 0.
+  parameter resources.
+  parameter state. // pass 0 the first time, then pass the returned value
+
+  if state = 0 {
+    set state to list(time:seconds, list()).
+    wait 0.05. // so we don't divide by dt=0
+  }
+
+  local timeNow to time:seconds.
+  local dt to timeNow - state[0].
+  set state[0] to timeNow.
+
+  local shortestBO to 999999.
+
+  for r in resources {
+    local recordIndex to recordIndexByName(r:name, state[1]).
+    if recordIndex = -1 {
+      state[1]:add(list(r:name, r:amount)).
+    } else {
+      local record to state[1][recordIndex].
+      state[1]:remove(recordIndex).
+      state[1]:add(list(r:name, r:amount)).
+
+      local rate to (record[1] - r:amount) / dt.
+      if rate > 0 {
+        set shortestBO to min(shortestBO, r:amount / rate).
+      }
+    }
+  }
+
+  return list(shortestBO, state).
+}
