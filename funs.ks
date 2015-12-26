@@ -168,7 +168,7 @@ function timeToBurnOut {
   parameter state. // pass 0 the first time, then pass the returned value
 
   if state = 0 {
-    set state to list(time:seconds, list()).
+    set state to list(time:seconds, lexicon()).
     wait 0.05. // so we don't divide by dt=0
   }
 
@@ -179,19 +179,16 @@ function timeToBurnOut {
   local shortestBO to 999999.
 
   for r in resources {
-    local recordIndex to recordIndexByName(r:name, state[1]).
-    if recordIndex = -1 {
-      state[1]:add(list(r:name, r:amount)).
-    } else {
-      local record to state[1][recordIndex].
-      state[1]:remove(recordIndex).
-      state[1]:add(list(r:name, r:amount)).
+    if state[1]:hasKey(r:name) {
+      local oldAmount to state[1][r:name].
 
-      local rate to (record[1] - r:amount) / dt.
+      local rate to (oldAmount - r:amount) / dt.
       if rate > 0 {
         set shortestBO to min(shortestBO, r:amount / rate).
       }
     }
+
+    set state[1][r:name] to r:amount.
   }
 
   return list(shortestBO, state).
