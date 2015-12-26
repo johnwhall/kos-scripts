@@ -29,7 +29,6 @@ lock throttle to 1.
 wait 1. // wait for lock throttle to take effect
 stage.
 
-// wait for engines to reach full thrust
 local igEs to ignitedEngines().
 wait until atFullThrust(igEs).
 
@@ -37,21 +36,18 @@ stage.
 
 wait 1.
 
-local forevec to heading(90, 90):vector.
-local upvec to ship:facing:topvector.
-lock steering to lookdirup(forevec, upvec).
+lock steering to lookdirup(up:vector, ship:facing:topvector).
 
 wait until ship:verticalspeed > 60.
 
-sas off. // turn SAS off so kOS doesn't fight it
-set forevec to heading(90, 85):vector.
+local initialTurnAngle to 5.
+lock steering to smoothScalarBasedTurn(ship:verticalspeed, 60, 80,
+                                       heading(90, 90):vector,
+                                       heading(90, 90 - initialTurnAngle):vector,
+                                       ship:facing:topvector).
 
-wait until faceDiff() < 0.5.
-sas on.
-
-wait until vang(ship:velocity:surface, ship:facing:vector) < 0.5.
-
-lock steering to lookdirup(ship:velocity:surface, upvec).
+wait until vang(ship:velocity:surface, up:vector) > initialTurnAngle.
+lock steering to lookdirup(ship:velocity:surface, ship:facing:topvector).
 
 local maxQ to ship:q.
 until ship:q < 0.75 * maxQ {
@@ -116,7 +112,7 @@ until lastEcc < ship:orbit:eccentricity {
   set offset to min(5, max(-5, offset)).
   print "offset: " + offset.
   if eta:apoapsis > 5 {
-    lock steering to lookdirup(heading(hdng, angleProgradeFromHorizon + offset):vector, upvec).
+    lock steering to lookdirup(heading(hdng, angleProgradeFromHorizon + offset):vector, ship:facing:topvector).
   }
   print "-----------------------------------------------------------------------------".
 

@@ -198,9 +198,9 @@ function smoothScalarBasedTurn {
   parameter curVal, startVal, endVal, startVec, endVec, upVec.
 
   if curVal < startVal {
-    return startVec.
+    return lookdirup(startVec, upVec).
   } else if curVal > endVal {
-    return endVec.
+    return lookdirup(endVec, upVec).
   } else {
     local frac to (curVal - startVal) / (endVal - startVal).
     local pointVec to frac * endVec + (1 - frac) * startVec.
