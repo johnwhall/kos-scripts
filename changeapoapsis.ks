@@ -30,17 +30,12 @@ lock throttle to throt.
 local prevSAS to sas.
 sas off.
 
-warpFor1(timeToBurnMid - bt - 90).
-
+local lock pointVec to retrograde:vector.
 if (tgtApo > ship:obt:apoapsis) {
-  lock steering to prograde.
-} else {
-  lock steering to retrograde.
+  lock pointVec to prograde:vector.
 }
-wait until faceDiff() < 0.5.
 
-warpFor1(timeToBurnMid - (bt / 2) - 5).
-wait until timeToBurnMid < (bt / 2).
+run prepareForBurn(pointVec, time:seconds + timeToBurnMid, bt, 10).
 
 local curDiff to 0.
 lock curDiff to abs(ship:obt:apoapsis - tgtApo).
