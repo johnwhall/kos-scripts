@@ -1,5 +1,7 @@
 @lazyglobal off.
 
+parameter initialTurnAngle, initialTurnStartSpeed.
+
 run once funs.
 
 function atFullThrust {
@@ -38,12 +40,11 @@ wait 1.
 
 lock steering to lookdirup(up:vector, ship:facing:topvector).
 
-wait until ship:verticalspeed > 60.
+wait until ship:verticalspeed > initialTurnStartSpeed.
 
-local initialTurnAngle to 5.
 local launchHeading to 90.
 
-lock steering to smoothScalarBasedTurn(ship:verticalspeed, 60, 80,
+lock steering to smoothScalarBasedTurn(ship:verticalspeed, initialTurnStartSpeed, 80,
                                        heading(launchHeading, 90):vector,
                                        heading(launchHeading, 90 - initialTurnAngle):vector,
                                        ship:facing:topvector).
@@ -100,38 +101,36 @@ until lastEcc < ship:orbit:eccentricity {
   local dvToCirc to sqrt(body:mu / (body:radius + apoapsis)) - ship:velocity:orbit:mag.
   local ttcirc to burnTime1(dvToCirc).
 
-  print "lastEcc: " + lastEcc.
-  print "ship:orbit:eccentricity: " + ship:orbit:eccentricity.
-  print "lastETA: " + lastETA.
-  print "eta:apoapsis: " + eta:apoapsis.
-
   local dt to time:seconds - lastTime.
-  print "dt: " + dt.
 
   local etaRate to (lastETA - eta:apoapsis) / dt.
   local tteta to eta:apoapsis / etaRate.
-  print "etaRate: " + etaRate.
-  print "tteta: " + tteta.
-  print "ttcirc: " + ttcirc.
 
-  // for every 1 minute we are short of tteta, raise the nose by 5
+  // for every 1 minute we are short of tteta, raise the nose by 7
   // degrees (or point down if we are accelerating too fast)
-  local offset to 5 * (ttcirc - tteta) / 60.
+  local offset to 7 * (ttcirc - tteta) / 60.
   set offset to min(15, max(-15, offset)).
 
   if etaRate < 0 {
     set offset to -15.
   }
 
+  print "lastEcc: " + lastEcc.
+  print "ship:orbit:eccentricity: " + ship:orbit:eccentricity.
+  print "lastETA: " + lastETA.
+  print "eta:apoapsis: " + eta:apoapsis.
+  print "dt: " + dt.
+  print "etaRate: " + etaRate.
+  print "tteta: " + tteta.
+  print "ttcirc: " + ttcirc.
   print "offset: " + offset.
+  print "-----------------------------------------------------------------------------".
 
   local startTime to time:seconds.
   lock steering to smoothScalarBasedTurn(time:seconds, startTime, startTime + 20,
                                          ship:facing:vector,
                                          heading(hdng, angleProgradeFromHorizon + offset):vector,
                                          ship:facing:topvector).
-
-  print "-----------------------------------------------------------------------------".
 
   set lastEcc to ship:orbit:eccentricity.
   set lastETA to eta:apoapsis.
@@ -140,4 +139,6 @@ until lastEcc < ship:orbit:eccentricity {
 }
 
 unlock steering.
-unlock throttle.
+lock throttle to 0.
+
+wait 0.05. // wait for throttle change to take effect.

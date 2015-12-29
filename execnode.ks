@@ -2,13 +2,15 @@
 
 run once funs.
 
+parameter settleFuel.
+
 local throt to 0.
 lock throttle to throt.
 local prevSAS to sas.
 sas off.
 
 local bt to burnTime1(nextnode:deltav:mag).
-run prepareForBurn(nextnode:deltav, time:seconds + nextnode:eta, bt, 10).
+run prepareForBurn(nextnode:deltav, time:seconds + nextnode:eta, bt, settleFuel, 10).
 
 set throt to 1.
 local lastDV to nextnode:deltav:mag.

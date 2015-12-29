@@ -1,7 +1,8 @@
 @lazyglobal off.
 
 parameter where.
-parameter tgtApo.
+parameter tgtApo. // not including body radius
+parameter settleFuel.
 
 run once funs.
 
@@ -35,7 +36,7 @@ if (tgtApo > ship:obt:apoapsis) {
   lock pointVec to prograde:vector.
 }
 
-run prepareForBurn(pointVec, time:seconds + timeToBurnMid, bt, 10).
+run prepareForBurn(pointVec, time:seconds + timeToBurnMid, bt, settleFuel, 10).
 
 local curDiff to 0.
 lock curDiff to abs(ship:obt:apoapsis - tgtApo).
@@ -49,3 +50,6 @@ until lastDiff < curDiff {
 
 set throt to 0.
 set sas to prevSAS.
+unlock steering.
+
+wait 0.05. // wait for throttle change to take effect

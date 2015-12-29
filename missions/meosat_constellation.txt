@@ -1,0 +1,22 @@
+run calc.planner.transfer.ks(body, 250000, 28.5, 3000000, 0).
+Initial Orbital Velocity: 7759.02 m/s
+Transfer Burn Delta-V: 640.67 m/s
+Transfer Time: 59m 17.87s (3557.87 s)
+Inclination Change: 28.5 deg
+Circularization Burn Delta-V: 3118.62 m/s
+Target Orbital Velocity: 6521.93 m/s
+Total Delta-V: 3759.29 m/s
+Delta-V Lost Due to Inclination Change: 2531.43 m/s
+
+run calc.satconst.ks(body, 3000000, 4, 0.09).
+SMA: 9371 km
+Orbital Velocity: 6521.93 m/s
+Orbital Period: 2h 30m 27.97s (9027.97 s)
+Coverage Angle: 94.33 deg
+Full Equatorial Coverage: True
+Distance Between Satellites: 13252.595 km
+Maximum Eclipse Angle: 91.19 deg
+Time in Sunlight: 1h 52m 21.19s (6741.19 s)
+Time in Eclipse: 38m 6.77s (2286.77 s)
+Battery Required: 205.81 EC
+Generator Required: 0.12 EC/s (7.23 EC/m)

@@ -1,6 +1,6 @@
 @lazyglobal off.
 
-parameter pointVec, burnMidTime, burnTime, ts.
+parameter pointVec, burnMidTime, burnTime, settleFuel, ts.
 
 local oldPitchTS to steeringmanager:pitchts.
 local oldYawTS to steeringmanager:yawts.
@@ -18,10 +18,17 @@ set steeringmanager:pitchts to oldPitchTS.
 set steeringmanager:yawts to oldYawTS.
 wait until faceDiff() < 0.5.
 
-warpFor1(timeToBurnMid - (burnTime / 2) - 5).
+local settleTime to 0.
+if settleFuel { set settleTime to 5. }
 
-wait until timeToBurnMid - 5 < (burnTime / 2).
+warpFor1(timeToBurnMid - (burnTime / 2) - settleTime).
 
-set ship:control:fore to 1.
-wait 5.
-rcs off.
+wait until timeToBurnMid - settleTime < (burnTime / 2).
+
+if settleFuel {
+  local prevRCS to rcs.
+  rcs on.
+  set ship:control:fore to 1.
+  wait settleTime.
+  set rcs to prevRCS.
+}
