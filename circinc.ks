@@ -1,6 +1,6 @@
 @lazyglobal off.
 
-parameter tgtInc.
+parameter tgtInc, settleFuel.
 
 run once funs.
 
@@ -83,4 +83,4 @@ until i = 20 {
   set i to i + 1.
 }
 
-run execNode.
+run execNode(settleFuel).

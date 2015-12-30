@@ -37,6 +37,7 @@ if (tgtApo > ship:obt:apoapsis) {
 }
 
 run prepareForBurn(pointVec, time:seconds + timeToBurnMid, bt, settleFuel, 10).
+lock steering to lookdirup(pointVec, ship:facing:topvector).
 
 local curDiff to 0.
 lock curDiff to abs(ship:obt:apoapsis - tgtApo).

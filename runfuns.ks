@@ -1,3 +1,5 @@
 run once funs.
 
-addManeuverAtANode().
+print altitude.
+print trueAlt().
+print currentTWR().

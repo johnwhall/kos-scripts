@@ -11,6 +11,7 @@ sas off.
 
 local bt to burnTime1(nextnode:deltav:mag).
 run prepareForBurn(nextnode:deltav, time:seconds + nextnode:eta, bt, settleFuel, 10).
+lock steering to lookdirup(nextnode:deltav, ship:facing:topvector).
 
 set throt to 1.
 local lastDV to nextnode:deltav:mag.

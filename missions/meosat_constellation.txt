@@ -4,6 +4,8 @@ Transfer Burn Delta-V: 640.67 m/s
 Transfer Time: 59m 17.87s (3557.87 s)
 Inclination Change: 28.5 deg
 Circularization Burn Delta-V: 3118.62 m/s
+Circularization Burn Prograde: -203.15 m/s
+Circularization Burn Normal: 3111.99 m/s
 Target Orbital Velocity: 6521.93 m/s
 Total Delta-V: 3759.29 m/s
 Delta-V Lost Due to Inclination Change: 2531.43 m/s

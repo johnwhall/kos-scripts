@@ -135,6 +135,19 @@ function ignitedEngines {
   return ignited.
 }
 
+function atFullThrust {
+  local es to list().
+  list engines in es.
+
+  for e in es {
+    if (e:ignition and e:thrust / e:availablethrust < 0.95) {
+      return false.
+    }
+  }
+
+  return true.
+}
+
 function elementByName {
   parameter name.
   parameter l.
@@ -231,4 +244,27 @@ function printField {
   local paddedValue to stringValue:padleft(valueWidth).
   if valueAlign = "l" { set paddedValue to stringValue:padright(valueWidth). }
   print paddedValue at(col + labelWidth + 1, line).
+}
+
+function trueAlt {
+  if abs(altitude) < 0.05 or abs(altitude - alt:radar) / altitude > 0.05 {
+    return alt:radar.
+  } else {
+    return altitude - ship:geoposition:terrainheight.
+  }
+}
+
+function currentThrust {
+  local igEngs to ignitedEngines().
+  local T to 0.
+  for eng in igEngs {
+    set T to T + eng:thrust.
+  }
+  return T.
+}
+
+function currentTWR {
+  local T to currentThrust().
+  local gHere to body:mu / (body:radius + altitude)^2.
+  return T / (gHere * mass).
 }
