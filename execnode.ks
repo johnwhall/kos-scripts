@@ -15,13 +15,15 @@ lock steering to lookdirup(nextnode:deltav, ship:facing:topvector).
 
 set throt to 1.
 local lastDV to nextnode:deltav:mag.
+wait until atFullThrust().
 wait 0.05.
 until lastDV < nextnode:deltav:mag {
   set lastDV to nextnode:deltav:mag.
   wait 0.05.
 }
 
+unlock steering.
 set throt to 0.
 set sas to prevSAS.
 
-remove nextnode.
+safeRemoveNextNode().

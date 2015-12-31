@@ -268,3 +268,14 @@ function currentTWR {
   local gHere to body:mu / (body:radius + altitude)^2.
   return T / (gHere * mass).
 }
+
+function safeRemoveNextNode {
+  local n to node(time:seconds + 60*60*24*365*20, 1, 1, 1).
+  add n.
+  if nextnode = n {
+    remove n.
+  } else {
+    remove nextnode.
+    remove n.
+  }
+}
