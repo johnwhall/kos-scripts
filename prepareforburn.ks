@@ -1,5 +1,7 @@
 @lazyglobal off.
 
+run once funs.
+
 parameter pointVec, burnMidTime, burnTime, settleFuel, ts.
 
 local oldPitchTS to steeringmanager:pitchts.

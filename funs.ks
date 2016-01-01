@@ -268,3 +268,14 @@ function currentTWR {
   local gHere to body:mu / (body:radius + altitude)^2.
   return T / (gHere * mass).
 }
+
+function sign {
+  local parameter x.
+  if x > 0 {
+    return 1.
+  } else if x < 0 {
+    return -1.
+  } else {
+    return 0.
+  }
+}
