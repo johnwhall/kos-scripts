@@ -135,6 +135,19 @@ function ignitedEngines {
   return ignited.
 }
 
+function atZeroThrust {
+  local es to list().
+  list engines in es.
+
+  for e in es {
+    if (e:ignition and e:thrust <> 0) {
+      return false.
+    }
+  }
+
+  return true.
+}
+
 function atFullThrust {
   local es to list().
   list engines in es.

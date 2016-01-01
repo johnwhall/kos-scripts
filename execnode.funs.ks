@@ -41,4 +41,7 @@ function execNodeStop {
   lock throttle to 0.
   unlock steering.
   set sas to prevSAS.
+
+  wait until atZeroThrust().
+  wait 0.05.
 }

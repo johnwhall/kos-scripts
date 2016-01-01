@@ -32,5 +32,6 @@ if settleFuel {
   rcs on.
   set ship:control:fore to 1.
   wait settleTime.
+  set ship:control:fore to 0.
   set rcs to prevRCS.
 }
