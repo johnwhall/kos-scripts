@@ -26,4 +26,4 @@ unlock steering.
 set throt to 0.
 set sas to prevSAS.
 
-safeRemoveNextNode().
+remove nextnode.
