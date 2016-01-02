@@ -16,18 +16,22 @@ local xferBurnDeltaV to abs(xferBurnVel - initVel).
 
 local xferTime to constant:pi * xferSMA / sqrt(bod:mu / xferSMA).
 
-local deltaInc to abs(tgtInc - initInc).
+local deltaInc to tgtInc - initInc.
 
-local tgtVel to sqrt(bod:mu / tgtRadius).
+// Zero inclination change case
 local circBurnInitialVel to sqrt(bod:mu * (2 / tgtRadius - 1 / xferSMA)).
-local circBurnDeltaV to solveCosineRule(circBurnInitialVel, tgtVel, deltaInc).
+local circBurnDeltaV to abs(tgtVel - circBurnInitialVel).
+local circBurnProgradeDeltaV to tgtVel - circBurnInitialVel.
+local circBurnNormalDeltaV to 0.
 
-// Calculation for prograde and normal components
-// TODO: check signs since deltaInc is abs (I think I can just remove the abs).
-local phi to arccos((circBurnInitialVel^2 + circBurnDeltaV^2 - tgtVel^2) / (2 * circBurnInitialVel * circBurnDeltaV)).
-local alpha to 180 - phi.
-local circBurnProgradeDeltaV to circBurnDeltaV * cos(alpha).
-local circBurnNormalDeltaV to circBurnDeltaV * sin(alpha).
+if abs(deltaInc) > 1e-5 {
+  // Nonzero inclination change case
+  set circBurnDeltaV to solveCosineRule(circBurnInitialVel, tgtVel, deltaInc).
+  local phi to arccos((circBurnInitialVel^2 + circBurnDeltaV^2 - tgtVel^2) / (2 * circBurnInitialVel * circBurnDeltaV)).
+  local alpha to 180 - phi.
+  set circBurnProgradeDeltaV to circBurnDeltaV * cos(alpha).
+  set circBurnNormalDeltaV to circBurnDeltaV * sin(alpha).
+}
 
 local totalDetlaV to xferBurnDeltaV + circBurnDeltaV.
 local totalDeltaVNoInc to solveCosineRule(circBurnInitialVel, tgtVel, 0) + xferBurnDeltaV.
