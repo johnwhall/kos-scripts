@@ -6,7 +6,8 @@ run once libsecantmethod.ks.
 function angleToPrograde {
   // This is slightly inaccurate due to the fact that it doesn't account for the
   // body's motion around its body (e.g. for ship orbiting earth: earth's motion
-  // around sun). But this is only a problem when p_bcShipPos != ship:position.
+  // around sun). But this is only a problem when
+  // p_bcShipPos != ship:position - body:position.
 
   // bc = body-centric (for ship orbiting earth: earth-centric)
   // bb = body's body (for ship orbiting earth: sun)
