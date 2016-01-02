@@ -1,11 +1,15 @@
 @lazyglobal off.
 
-run once execnode.funs.ks.
+run once funs.
+run once genericburn.funs.ks.
 
-parameter settleFuel.
+parameter param_turnTime, param_ullageTime, param_ts.
 
-local execNodeState to list().
-execNodeStart(settleFuel, execNodeState).
-wait until not execNodeContinue(execNodeState).
-execNodeStop(execNodeState).
+local bt to burnTime1(nextnode:deltav:mag).
+local burnMidTime to time:seconds + nextnode:eta.
+
+local state to list().
+genericBurnStart(nextnode:deltav, burnMidTime, bt, param_turnTime, param_ullageTime, param_ts, nextnode:deltav:mag, state).
+wait until not genericBurnContinue(nextnode:deltav:mag, state).
+genericBurnStop(state).
 remove nextnode.

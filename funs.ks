@@ -28,7 +28,7 @@ function burnTime4 {
   parameter myMaxThrust.
   parameter myDV.
 
-  local ve to myIsp * 9.82.
+  local ve to myIsp * 9.80665.
   return (myMass * ve / myMaxThrust) * (1 - constant():e^(-myDV / ve)).
 }
 
