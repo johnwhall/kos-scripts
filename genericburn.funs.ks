@@ -1,12 +1,25 @@
+run once libwarpfor.
 run once funs.
 
-function genericBurnPrepare {
+function genericBurnWait {
+  parameter p_burnMidTime, p_burnTime, p_turnTime.
+  lock throttle to 0.
+  local timeToBurnMid to p_burnMidTime - time:seconds.
+  warpFor1(timeToBurnMid - p_burnTime - p_turnTime).
+}
+
+function genericBurnStart {
   parameter param_pointVec.
   parameter param_burnMidTime.
   parameter param_burnTime.
   parameter param_turnTime.
   parameter param_ullageTime.
   parameter param_ts.
+  parameter param_curVal.
+  parameter param_state.
+
+  local prevSAS to sas.
+  sas off.
 
   local oldPitchTS to steeringmanager:pitchts.
   local oldYawTS to steeringmanager:yawts.
@@ -14,8 +27,6 @@ function genericBurnPrepare {
   set steeringmanager:yawts to param_ts.
 
   local lock timeToBurnMid to param_burnMidTime - time:seconds.
-
-  warpFor1(timeToBurnMid - param_burnTime - param_turnTime).
 
   lock steering to lookdirup(param_pointVec, ship:facing:topvector).
   wait until faceDiff() < 5.
@@ -44,40 +55,24 @@ function genericBurnPrepare {
     set ship:control:fore to 0.
     set rcs to prevRCS.
   }
-}
-
-function genericBurnStart {
-  parameter param_pointVec.
-  parameter param_burnMidTime.
-  parameter param_burnTime.
-  parameter param_turnTime.
-  parameter param_ullageTime.
-  parameter param_ts.
-  parameter param_curVal.
-  parameter param_state.
-
-  lock throttle to 0.
-  local prevSAS to sas.
-  sas off.
-
-  genericBurnPrepare(param_pointVec, param_burnMidTime, param_burnTime, param_turnTime, param_ullageTime, param_ts).
-  lock steering to lookdirup(param_pointVec, ship:facing:topvector).
-
-  print "starting burn at " + time:seconds.
-  lock throttle to 1.
-  local lastVal to param_curVal.
-  wait until atFullThrust().
-  wait 0.05.
 
   local dummy to param_state:clear.
   param_state:add(prevSAS).
   param_state:add(param_curVal).
+
+  print "starting burn at " + time:seconds.
+  lock throttle to 1.
+  wait until atFullThrust().
+  wait 0.05.
 }
 
 function genericBurnContinue {
   // return false if node is finished
+  parameter param_pointVec.
   parameter param_curVal.
   parameter param_state.
+
+  lock steering to lookdirup(param_pointVec, ship:facing:topvector).
 
   local lastVal to param_state[1].
   set param_state[1] to param_curVal.

@@ -8,8 +8,13 @@ parameter param_turnTime, param_ullageTime, param_ts.
 local bt to burnTime1(nextnode:deltav:mag).
 local burnMidTime to time:seconds + nextnode:eta.
 
+genericBurnWait(burnMidTime, bt, param_turnTime).
+
 local state to list().
-genericBurnStart(nextnode:deltav, burnMidTime, bt, param_turnTime, param_ullageTime, param_ts, nextnode:deltav:mag, state).
-wait until not genericBurnContinue(nextnode:deltav:mag, state).
+genericBurnStart(nextnode:deltav, burnMidTime, bt, param_turnTime,
+                 param_ullageTime, param_ts, nextnode:deltav:mag, state).
+
+wait until not genericBurnContinue(nextnode:deltav, nextnode:deltav:mag, state).
+
 genericBurnStop(state).
 remove nextnode.
