@@ -85,46 +85,46 @@ function kepElemToEciVecs {
   return list(V(x, y, z), V(vx, vy, vz)).
 }
 
-function hlist {
-  parameter l.
-  local s to "(".
-  for i in l {
-    set s to s + round(i, 5) + ", ".
-  }
-  set s to s:substring(0, s:length - 2) + ")".
-  return s.
-}
-
-function roundVec {
-  parameter v.
-  return"V(" + round(v:x, 5) + ", " + round(v:y, 5) + ", " + round(v:z, 5) + ")".
-}
-
-local tests to list().
-tests:add(list(1, V(1, 0, 0), V(0, 1, 0), list(1, 0, 0, 0, 0, 0))).
-tests:add(list(1, V(1, 0, 0), V(0, 0.5, 0.5), list(0.66667, 0.5, 45, 0, 180, 180))).
-tests:add(list(1, V(1, 0, 0), V(0.5, 0.5, 0.5), list(0.8, 0.61237244, 45, 0, 215.26438968, 144.73561032))).
-tests:add(list(1, V(0, 0, -1), V(0.5, 0, 0.5), list(0.66667, 0.79056942, 90, 0, 71.56505118, 198.43494882))).
-tests:add(list(1, V(0, -1, 0), V(0.5, 0, 0.5), list(0.66667, 0.5, 45, 270, 180, 180))).
-
-print "eciVecsToKepElem:".
-
-for t in tests {
-  local out to eciVecsToKepElem(t[0], t[1], t[2]).
-  print "" + t[0] + ", " + t[1] + ", " + t[2] + ", " + hlist(t[3]) + " --> " + hlist(out).
-  if hlist(t[3]) <> hlist(out) {
-    print "FAIL!".
-    exit.
-  }
-}
-
-print "kepElemToEciVecs:".
-
-for t in tests {
-  local out to kepElemToEciVecs(t[0], t[3]).
-  print "" + t[0] + ", " + t[1] + ", " + t[2] + ", " + hlist(t[3]) + " --> " + roundVec(out[0]) + ", " + roundVec(out[1]).
-  if roundVec(t[1]) <> roundVec(out[0]) or roundVec(t[2]) <> roundVec(out[1]) {
-    print "FAIL!".
-    exit.
-  }
-}
+//function hlist {
+//  parameter l.
+//  local s to "(".
+//  for i in l {
+//    set s to s + round(i, 5) + ", ".
+//  }
+//  set s to s:substring(0, s:length - 2) + ")".
+//  return s.
+//}
+//
+//function roundVec {
+//  parameter v.
+//  return"V(" + round(v:x, 5) + ", " + round(v:y, 5) + ", " + round(v:z, 5) + ")".
+//}
+//
+//local tests to list().
+//tests:add(list(1, V(1, 0, 0), V(0, 1, 0), list(1, 0, 0, 0, 0, 0))).
+//tests:add(list(1, V(1, 0, 0), V(0, 0.5, 0.5), list(0.66667, 0.5, 45, 0, 180, 180))).
+//tests:add(list(1, V(1, 0, 0), V(0.5, 0.5, 0.5), list(0.8, 0.61237244, 45, 0, 215.26438968, 144.73561032))).
+//tests:add(list(1, V(0, 0, -1), V(0.5, 0, 0.5), list(0.66667, 0.79056942, 90, 0, 71.56505118, 198.43494882))).
+//tests:add(list(1, V(0, -1, 0), V(0.5, 0, 0.5), list(0.66667, 0.5, 45, 270, 180, 180))).
+//
+//print "eciVecsToKepElem:".
+//
+//for t in tests {
+//  local out to eciVecsToKepElem(t[0], t[1], t[2]).
+//  print "" + t[0] + ", " + t[1] + ", " + t[2] + ", " + hlist(t[3]) + " --> " + hlist(out).
+//  if hlist(t[3]) <> hlist(out) {
+//    print "FAIL!".
+//    exit.
+//  }
+//}
+//
+//print "kepElemToEciVecs:".
+//
+//for t in tests {
+//  local out to kepElemToEciVecs(t[0], t[3]).
+//  print "" + t[0] + ", " + t[1] + ", " + t[2] + ", " + hlist(t[3]) + " --> " + roundVec(out[0]) + ", " + roundVec(out[1]).
+//  if roundVec(t[1]) <> roundVec(out[0]) or roundVec(t[2]) <> roundVec(out[1]) {
+//    print "FAIL!".
+//    exit.
+//  }
+//}

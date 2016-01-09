@@ -1,68 +1,43 @@
 @lazyglobal off.
 
-function secantMethodInitState {
-  parameter p_maxIter.
-  parameter p_convCrit.
+run once libcallback.
+
+function secantMethod {
+  parameter p_cbScript.
+  parameter p_x0.
   parameter p_x1.
-  parameter p_fx1.
-  parameter p_x2.
-  parameter p_state.
+  parameter p_maxIter.
+  parameter p_tol.
 
-  p_state:clear.
-  p_state:add(p_x1).
-  p_state:add(p_fx1).
-  p_state:add(p_x2).
-  p_state:add(0).
-  p_state:add(p_maxIter).
-  p_state:add(p_convCrit).
+  local xnm2 to p_x0.
+  local xnm1 to p_x1.
+
+  local fxnm1 to doCallbackR1(p_cbScript, xnm1).
+  local fxnm2 to doCallbackR1(p_cbScript, xnm2).
+
+  local iter to 1.
+  until iter > p_maxIter {
+    local x to xnm1 - fxnm1 * (xnm1 - xnm2) / (fxnm1 - fxnm2).
+    local fx to doCallbackR1(p_cbScript, x).
+
+    if abs(fx) < p_tol {
+      return x.
+    }
+
+    set xnm2 to xnm1.
+    set fxnm2 to fxnm1.
+    set xnm1 to x.
+    set fxnm1 to fx.
+    set iter to iter + 1.
+  }
+
+  print "FAILED TO CONVERGE!".
+  exit.
 }
 
-function secantMethodConverged {
-  parameter p_fx.
-  parameter p_state.
-
-  local convCrit to p_state[5].
-
-  return abs(p_fx) < convCrit.
-}
-
-function secantMethodPastMaxIter {
-  parameter p_state.
-
-  local iter to p_state[3].
-  local maxIter to p_state[4].
-
-  return iter > maxIter.
-}
-
-function secantMethodIter {
-  parameter p_fx.
-  parameter p_state.
-
-  local xm1 to p_state[0].
-  local fxm1 to p_state[1].
-  local x to p_state[2].
-  local iter to p_state[3].
-
-  local xp1 to x - p_fx * (x - xm1) / (p_fx - fxm1).
-
-  set p_state[0] to x.
-  set p_state[1] to p_fx.
-  set p_state[2] to xp1.
-  set p_state[3] to iter + 1.
-
-  return xp1.
-}
-
-//function f {
-//  parameter x.
-//  return x^2 - 612.
-//}
-//
-//local state to list().
-//secantMethodInitState(6, 1e-5, 10, f(10), 30, state).
-//local x to 30.
-//until secantMethodConverged(f(x), state) or secantMethodPastMaxIter(state) {
-//  set x to secantMethodIter(f(x), state).
-//}
+//run once libsecantmethod_callback.
+//local x to secantMethod("libsecantmethod_callback", 10, 30, 7, 1e-5).
+//print x.
+//set g_libsecantmethod_callback_offset to 700.
+//local x to secantMethod("libsecantmethod_callback", 10, 30, 7, 1e-5).
 //print x.

@@ -1,7 +1,7 @@
 @lazyglobal off.
 
-run once funs.
-run once libsecantmethod.ks.
+run once libsecantmethod.
+run once libangletoprograde_callback.
 
 function angleToPrograde {
   // This is slightly inaccurate due to the fact that it doesn't account for the
@@ -30,15 +30,6 @@ function angleToPrograde {
   return angToPro.
 }
 
-function ttatpf {
-  parameter p_deltaTimeGuess.
-  parameter p_tgtAngle.
-  local guessSCShipPos to positionat(ship, time:seconds + p_deltaTimeGuess).
-  local guessBCShipPos to guessSCShipPos - body:position.
-  local guessAngle to angleToPrograde(guessBCShipPos).
-  return absDiffMod(guessAngle, p_tgtAngle, 360).
-}
-
 function timeToAngleToPrograde {
   // This is slightly inaccurate due to the fact that it doesn't account for the
   // body's motion around its body (e.g. for ship orbiting earth: earth's motion
@@ -47,37 +38,18 @@ function timeToAngleToPrograde {
 
   local curAngle to angleToPrograde(ship:position - body:position).
   local tgtAngle to p_tgtAngle.
+  set g_libangletoprograde_callback_tgtAngle to tgtAngle.
 
   local deltaAngle to curAngle - tgtAngle.
   if deltaAngle < 0 {
     set deltaAngle to deltaAngle + 360.
   }
 
-  local initialGuess to deltaAngle / (360 / ship:obt:period).
-  local initialVal to ttatpf(initialGuess, tgtAngle).
+  local guess1 to deltaAngle / (360 / ship:obt:period).
+  local guess2 to guess1 + 100.
+  local result to secantMethod("libangletoprograde_callback", guess1, guess2, 10, 1e-2).
 
-  local state to list().
-  local curGuess to initialGuess + 100.
-  secantMethodInitState(10, 1e-2, initialGuess, initialVal, curGuess, state).
-  local converged to false.
-  local pastMaxIter to false.
-
-  until converged or pastMaxIter {
-    local curVal to ttatpf(curGuess, tgtAngle).
-
-    if secantMethodConverged(curVal, state) {
-      set converged to true.
-    } else if secantMethodPastMaxIter(state) {
-      set pastMaxIter to true.
-    } else {
-      set curGuess to secantMethodIter(curVal, state).
-    }
-  }
-
-  if pastMaxIter { print "PAST MAX ITER!". }
-  if not converged { print "DID NOT CONVERGE!". }
-
-  return curGuess.
+  return result.
 }
 
 //local tgtAngle to 270.
