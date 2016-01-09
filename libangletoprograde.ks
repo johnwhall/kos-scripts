@@ -49,8 +49,8 @@ function timeToAngleToPrograde {
   local tgtAngle to p_tgtAngle.
 
   local deltaAngle to curAngle - tgtAngle.
-  if curAngle < tgtAngle {
-    local deltaAngle to curAngle + (360 - tgtAngle).
+  if deltaAngle < 0 {
+    set deltaAngle to deltaAngle + 360.
   }
 
   local initialGuess to deltaAngle / (360 / ship:obt:period).
@@ -80,5 +80,15 @@ function timeToAngleToPrograde {
   return curGuess.
 }
 
-//local ttatp to timeToAngleToPrograde(270).
-//add node(time:seconds + ttatp, 0, 0, 0).
+//local tgtAngle to 270.
+//local ttatp to timeToAngleToPrograde(tgtAngle).
+////add node(time:seconds + ttatp, 0, 0, 0).
+//
+//local scShipPosAt to positionat(ship, time:seconds + ttatp).
+//local bcShipPosAt to scShipPosAt - body:position.
+//
+//print "Current ATP: " + angleToPrograde(ship:position - body:position).
+//print "Target ATP: " + tgtAngle.
+//print "Time to Target: " + ttatp.
+//print "Position at Target Time: " + scShipPosAt.
+//print "Calculated ATP: " + angleToPrograde(bcShipPosAt).
