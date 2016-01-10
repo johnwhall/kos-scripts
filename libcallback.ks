@@ -13,6 +13,14 @@ function doCallbackR1 {
     return libbisectionmethod_callback_function(p_p1).
   } else if p_cbScript = "libbrentsmethod_callback" {
     return libbrentsmethod_callback_function(p_p1).
+  } else if p_cbScript = "liblambert_callback_fy" {
+    return liblambert_callback_fy_function(p_p1).
+  } else if p_cbScript = "liblambert_callback_ftau" {
+    return liblambert_callback_ftau_function(p_p1).
+  } else if p_cbScript = "liblambert_callback_anon1" {
+    return liblambert_callback_anon1_function(p_p1).
+  } else if p_cbScript = "liblambert_callback_anon2" {
+    return liblambert_callback_anon2_function(p_p1).
   }
   print "UNKNOWN CALLBACK: " + p_cbScript.
   exit.

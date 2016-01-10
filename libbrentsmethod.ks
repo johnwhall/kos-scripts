@@ -13,6 +13,9 @@ function brentsMethod {
   parameter p_maxIter.
   parameter p_relAcc.
 
+//  print "brent => p_a = " + p_a.
+//  print "brent => p_b = " + p_b.
+
   local a to p_a.
   local b to p_b.
   local fa to doCallbackR1(p_cbScript, a).
@@ -23,9 +26,11 @@ function brentsMethod {
   local e to d.
   local relAcc to p_relAcc + 0.5 * eps.
 
+//  print "brent => fa = " + fa.
+//  print "brent => fb = " + fb.
+
   if sign(fa) = sign(fb) {
-    print "a AND b DO NOT BOUND SOLUTION!".
-    exit.
+    return list(false, 0).
   }
 
   local i to 0.
@@ -43,12 +48,11 @@ function brentsMethod {
     local m to 0.5 * (c - b).
 
     if abs(fb) < eps or abs(m) <= tol {
-      return b.
+      return list(true, b).
     }
 
     if i > p_maxIter {
-      print "FAILED TO CONVERGE!".
-      exit.
+      return list(false, 1).
     }
 
     if abs(e) < tol or abs(fa) <= abs(fb) {
