@@ -31,7 +31,7 @@ function eciVecsToKepElem {
 
   // True Anomaly
   local ta to 0.
-  if e <> 0 {
+  if e <> 0 { // TODO: do something reasonable when the orbit is circular
     set ta to arccos(vdot(eVec, r) / (e * r:mag)).
     if vdot(r, v) < 0 { set ta to 360 - ta. }
   }
@@ -84,6 +84,27 @@ function kepElemToEciVecs {
 
   return list(V(x, y, z), V(vx, vy, vz)).
 }
+
+function getECIVecs
+{
+	parameter p_obt.
+	return kepElemToEciVecs(p_obt:body:mu, list(p_obt:semimajoraxis,
+	                                            p_obt:eccentricity,
+									      	    p_obt:inclination,
+										        p_obt:longitudeofascendingnode,
+      										    p_obt:argumentofperiapsis,
+	      									    p_obt:trueanomaly)).
+}
+
+//print body:mu.
+//print getECIVecs(ship:orbit).
+//print getECIVecs(orbitat(ship, time:seconds + 60 * 60)).
+//print kepElemToEciVecs(body:mu, list(ship:orbit:semimajoraxis,
+//                                     ship:orbit:eccentricity,
+//									 ship:orbit:inclination,
+//									 ship:orbit:longitudeofascendingnode,
+//									 ship:orbit:argumentofperiapsis,
+//									 0)).
 
 //function hlist {
 //  parameter l.

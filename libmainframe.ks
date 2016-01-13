@@ -1,5 +1,7 @@
 @lazyglobal off.
 
+run once liborbitalstate.
+
 function waitForExists {
   parameter p_fname.
 
@@ -75,5 +77,53 @@ function mainframeSquare {
   return mainframeFinish().
 }
 
-print mainframeSquare(3).
-print mainframeSquare(6).
+function mainframeLambertOptimize {
+  parameter p_s1.
+  parameter p_s2.
+  parameter p_tMin.
+  parameter p_tMax.
+  parameter p_tStep.
+  parameter p_dtMin.
+  parameter p_dtMax.
+  parameter p_dtStep.
+
+  local b to p_s1:body.
+  if p_s2:body <> b {
+    print "bodies must be the same".
+     exit.
+  }
+
+  mainframePrep().
+  local rv1 to getECIVecs(p_s1:orbit).
+  local rv2 to getECIVecs(p_s2:orbit).
+
+  log "lambertoptimize" to libmainframe_request.txt.
+  log b:mu to libmainframe_request.txt.
+
+  log rv1[0]:x to libmainframe_request.txt.
+  log rv1[0]:y to libmainframe_request.txt.
+  log rv1[0]:z to libmainframe_request.txt.
+  log rv1[1]:x to libmainframe_request.txt.
+  log rv1[1]:y to libmainframe_request.txt.
+  log rv1[1]:z to libmainframe_request.txt.
+
+  log rv2[0]:x to libmainframe_request.txt.
+  log rv2[0]:y to libmainframe_request.txt.
+  log rv2[0]:z to libmainframe_request.txt.
+  log rv2[1]:x to libmainframe_request.txt.
+  log rv2[1]:y to libmainframe_request.txt.
+  log rv2[1]:z to libmainframe_request.txt.
+
+  log tMin to libmainframe_request.txt.
+  log tMax to libmainframe_request.txt.
+  log tStep to libmainframe_request.txt.
+
+  log dtMin to libmainframe_request.txt.
+  log dtMax to libmainframe_request.txt.
+  log dtStep to libmainframe_request.txt.
+
+  return mainframeFinish().
+}
+
+//print mainframeSquare(3).
+//print mainframeSquare(6).

@@ -17,18 +17,14 @@ public class LambertSolverTest {
 		return new Vector3D(x * cos - y * sin, x * sin + y * cos, z);
 	}
 
-	private static void assertRelativelyEquals(double a, double b) {
-		assertEquals(a, b, Math.min(Math.abs(a), Math.abs(b)) * 1e-4);
-	}
-
 	private static void assertSolutionEquals(double v1x, double v1y, double v1z, double v2x, double v2y, double v2z, double a, Solution sol) {
-		assertRelativelyEquals(v1x, sol.v1.getX());
-		assertRelativelyEquals(v1y, sol.v1.getY());
-		assertRelativelyEquals(v1z, sol.v1.getZ());
-		assertRelativelyEquals(v2x, sol.v2.getX());
-		assertRelativelyEquals(v2y, sol.v2.getY());
-		assertRelativelyEquals(v2z, sol.v2.getZ());
-		assertRelativelyEquals(a, sol.angle);
+		TestUtils.assertRelativelyEquals(v1x, sol.v1.getX(), 1e-4);
+		TestUtils.assertRelativelyEquals(v1y, sol.v1.getY(), 1e-4);
+		TestUtils.assertRelativelyEquals(v1z, sol.v1.getZ(), 1e-4);
+		TestUtils.assertRelativelyEquals(v2x, sol.v2.getX(), 1e-4);
+		TestUtils.assertRelativelyEquals(v2y, sol.v2.getY(), 1e-4);
+		TestUtils.assertRelativelyEquals(v2z, sol.v2.getZ(), 1e-4);
+		TestUtils.assertRelativelyEquals(a, sol.angle, 1e-4);
 	}
 
 	@Test
