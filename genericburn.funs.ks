@@ -60,6 +60,8 @@ function genericBurnStart {
   param_state:add(prevSAS).
   param_state:add(param_curVal).
 
+  print "initializing val to " + param_curVal.
+
   print "starting burn at " + time:seconds.
   lock throttle to 1.
   wait until atFullThrust().
@@ -76,6 +78,9 @@ function genericBurnContinue {
 
   local lastVal to param_state[1].
   set param_state[1] to param_curVal.
+
+  print "lastVal = " + lastVal.
+  print "curVal = " + param_curVal.
 
   wait 0.05.
 

@@ -73,10 +73,13 @@ wait 3.
 // We weren't turning for a while, and the staging might have changed our orientation slightly,
 // so instead of jumping back to the target vector (which we are probably off of a few degrees
 // by now), reset the turn.
-set startAlt to ship:altitude.
-lock steering to smoothScalarBasedTurn(ship:altitude, startAlt, 100000,
-                                       ship:velocity:surface, ship:velocity:orbit,
-                                       ship:facing:topvector).
+//set startAlt to ship:altitude.
+//lock steering to smoothScalarBasedTurn(ship:altitude, startAlt, 100000,
+////                                       ship:velocity:surface, ship:velocity:orbit,
+//                                       ship:facing:vector, ship:velocity:orbit,
+//                                       ship:facing:topvector).
+
+unlock steering.
 
 stage.
 wait 8.

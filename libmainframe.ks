@@ -57,6 +57,22 @@ function mainframeFinish {
     run libmainframe_result_1.ks.
   } else if g_libmainframe_nextRequestNum = 2 {
     run libmainframe_result_2.ks.
+  } else if g_libmainframe_nextRequestNum = 3 {
+    run libmainframe_result_3.ks.
+  } else if g_libmainframe_nextRequestNum = 4 {
+    run libmainframe_result_4.ks.
+  } else if g_libmainframe_nextRequestNum = 5 {
+    run libmainframe_result_5.ks.
+  } else if g_libmainframe_nextRequestNum = 6 {
+    run libmainframe_result_6.ks.
+  } else if g_libmainframe_nextRequestNum = 7 {
+    run libmainframe_result_7.ks.
+  } else if g_libmainframe_nextRequestNum = 8 {
+    run libmainframe_result_8.ks.
+  } else if g_libmainframe_nextRequestNum = 9 {
+    run libmainframe_result_9.ks.
+  } else if g_libmainframe_nextRequestNum = 10 {
+    run libmainframe_result_10.ks.
   } else {
     print "RAN OUT OF MAINFRAME CALLS".
     exit.
@@ -74,6 +90,49 @@ function mainframeSquare {
   mainframePrep().
   log "square" to libmainframe_request.txt.
   log p_x to libmainframe_request.txt.
+  return mainframeFinish().
+}
+
+function mainframeLambertOptimizeVecs {
+  parameter p_mu.
+  parameter p_r1.
+  parameter p_v1.
+  parameter p_r2.
+  parameter p_v2.
+  parameter p_tMin.
+  parameter p_tMax.
+  parameter p_tStep.
+  parameter p_dtMin.
+  parameter p_dtMax.
+  parameter p_dtStep.
+
+  mainframePrep().
+
+  log "lambertoptimize" to libmainframe_request.txt.
+  log p_mu to libmainframe_request.txt.
+
+  log p_r1:x to libmainframe_request.txt.
+  log p_r1:y to libmainframe_request.txt.
+  log p_r1:z to libmainframe_request.txt.
+  log p_v1:x to libmainframe_request.txt.
+  log p_v1:y to libmainframe_request.txt.
+  log p_v1:z to libmainframe_request.txt.
+
+  log p_r2:x to libmainframe_request.txt.
+  log p_r2:y to libmainframe_request.txt.
+  log p_r2:z to libmainframe_request.txt.
+  log p_v2:x to libmainframe_request.txt.
+  log p_v2:y to libmainframe_request.txt.
+  log p_v2:z to libmainframe_request.txt.
+
+  log p_tMin to libmainframe_request.txt.
+  log p_tMax to libmainframe_request.txt.
+  log p_tStep to libmainframe_request.txt.
+
+  log p_dtMin to libmainframe_request.txt.
+  log p_dtMax to libmainframe_request.txt.
+  log p_dtStep to libmainframe_request.txt.
+
   return mainframeFinish().
 }
 
@@ -114,13 +173,13 @@ function mainframeLambertOptimize {
   log rv2[1]:y to libmainframe_request.txt.
   log rv2[1]:z to libmainframe_request.txt.
 
-  log tMin to libmainframe_request.txt.
-  log tMax to libmainframe_request.txt.
-  log tStep to libmainframe_request.txt.
+  log p_tMin to libmainframe_request.txt.
+  log p_tMax to libmainframe_request.txt.
+  log p_tStep to libmainframe_request.txt.
 
-  log dtMin to libmainframe_request.txt.
-  log dtMax to libmainframe_request.txt.
-  log dtStep to libmainframe_request.txt.
+  log p_dtMin to libmainframe_request.txt.
+  log p_dtMax to libmainframe_request.txt.
+  log p_dtStep to libmainframe_request.txt.
 
   return mainframeFinish().
 }

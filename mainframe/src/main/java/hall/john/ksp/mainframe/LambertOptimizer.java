@@ -153,7 +153,7 @@ public class LambertOptimizer {
 		System.out.println("dt = " + dt);
 
 		ManeuverNode node = new ManeuverNode(oat0.afterTime(t), dv1);
-		String str = "list(" + t + ", " + node.getPrograde() + ", " + node.getNormal() + ", " + node.getRadial() + ")";
+		String str = "list(" + t + ", " + node.getPrograde() + ", " + node.getNormal() + ", " + node.getRadial() + ", " + dt + ")";
 		return str;
 
 	}
