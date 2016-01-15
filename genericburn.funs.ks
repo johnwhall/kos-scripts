@@ -35,17 +35,9 @@ function genericBurnStart {
   set steeringmanager:yawts to oldYawTS.
   wait until faceDiff() < 0.5.
 
-  print "time: " + time:seconds.
-  print "burnTime: " + param_burnTime.
-  print "burnMidTime: " + param_burnMidTime.
-  print "ullageTime: " + param_ullageTime.
-  print "timeToBurnMid: " + timeToBurnMid.
-  print "warping for: " + (timeToBurnMid - (param_burnTime / 2) - param_ullageTime).
   warpFor1(timeToBurnMid - (param_burnTime / 2) - param_ullageTime).
 
-  print "starting wait at " + time:seconds.
   wait until timeToBurnMid - param_ullageTime < (param_burnTime / 2).
-  print "ending wait at " + time:seconds.
 
   if param_ullageTime <> 0 {
     local prevRCS to rcs.
@@ -59,10 +51,8 @@ function genericBurnStart {
   local dummy to param_state:clear.
   param_state:add(prevSAS).
   param_state:add(param_curVal).
+  param_state:add(param_curVal).
 
-  print "initializing val to " + param_curVal.
-
-  print "starting burn at " + time:seconds.
   lock throttle to 1.
   wait until atFullThrust().
   wait 0.05.
@@ -79,12 +69,11 @@ function genericBurnContinue {
   local lastVal to param_state[1].
   set param_state[1] to param_curVal.
 
-  print "lastVal = " + lastVal.
-  print "curVal = " + param_curVal.
-
   wait 0.05.
 
-  return lastVal >= param_state[1].
+  local ratio to param_state[1] / param_state[2].
+  if ratio > 0.95 and ratio < 1.05 { return true. }
+  else { return lastVal >= param_state[1]. }
 }
 
 function genericBurnStop {
@@ -95,7 +84,6 @@ function genericBurnStop {
   lock throttle to 0.
   unlock steering.
   set sas to prevSAS.
-  print "ending burn at " + time:seconds.
 
   wait until atZeroThrust().
   wait 0.05.
