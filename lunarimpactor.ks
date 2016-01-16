@@ -16,7 +16,7 @@ function waitForLAN {
   warpFor1(body:rotationperiod * dlan / 360).
 }
 
-waitForLAN(2).
+waitForLAN(8.5).
 
 run launch(5, 55).
 
