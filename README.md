@@ -1,1 +1,0 @@
-# kos-scripts
