@@ -38,7 +38,7 @@ lock steering to lookdirup(retrograde:vector, ship:facing:topvector).
 wait until faceDiff() < 0.5.
 
 lock throttle to 1.
-wait until ship:orbit:apoapsis < 80000.
+wait until ship:orbit:periapsis < 80000.
 lock throttle to 0.
 
 rcs off.
