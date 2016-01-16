@@ -14,6 +14,24 @@ function engineFlamedOut {
   return false.
 }
 
+local obtProProjOntoHorizon to 0.
+lock obtProProjOntoHorizon to ship:velocity:orbit - vdot(ship:velocity:orbit, up:vector) * up:vector.
+
+local srfProProjOntoHorizon to 0.
+lock srfProProjOntoHorizon to ship:velocity:surface - vdot(ship:velocity:surface, up:vector) * up:vector.
+
+local obtHdng to 0.
+lock obtHdng to vang(obtProProjOntoHorizon, north:vector).
+
+local srfHdng to 0.
+lock srfHdng to vang(srfProProjOntoHorizon, north:vector).
+
+local obtPitch to 0.
+lock obtPitch to 90 - vang(ship:velocity:orbit, up:vector).
+
+local srfPitch to 0.
+lock srfPitch to 90 - vang(ship:velocity:surface, up:vector).
+
 set ship:control:pilotmainthrottle to 0.
 sas on.
 gear off.
@@ -40,7 +58,7 @@ lock steering to smoothScalarBasedTurn(ship:verticalspeed, initialTurnStartSpeed
                                        ship:facing:topvector).
 
 wait until vang(ship:velocity:surface, up:vector) > initialTurnAngle.
-lock steering to lookdirup(ship:velocity:surface, ship:facing:topvector).
+lock steering to lookdirup(heading(launchHeading, srfPitch):vector, ship:facing:topvector).
 
 local maxQ to ship:q.
 until ship:q < 0.75 * maxQ {
@@ -70,15 +88,6 @@ stage.
 wait 8.
 stage.
 
-local progradeProjection to 0.
-lock progradeProjection to ship:velocity:orbit - vdot(ship:velocity:orbit, up:vector) * up:vector.
-
-local hdng to 0.
-lock hdng to vang(progradeProjection, north:vector).
-
-local angleProgradeFromHorizon to 0.
-lock angleProgradeFromHorizon to 90 - vang(ship:velocity:orbit, up:vector).
-
 local lastEcc to ship:orbit:eccentricity.
 local lastLAN to ship:orbit:longitudeofascendingnode.
 local lastETA to eta:apoapsis.
@@ -87,7 +96,7 @@ local lanPID to PIDLoop(1, 0, 0, -1, 1).
 local pitchUpdatePeriod to 5.
 local lastPitchUpdateTime to 0.
 local pitchOffset to 0.
-local pitchStart to angleProgradeFromHorizon.
+local pitchStart to obtPitch.
 local pitchEnd to pitchStart.
 wait 1.
 
@@ -114,7 +123,7 @@ until lastEcc < ship:orbit:eccentricity {
     set lastPitchUpdateTime to time:seconds.
     local curPitch to 90 - vang(ship:facing:vector, up:vector).
     set pitchStart to curPitch.
-    set pitchEnd to angleProgradeFromHorizon + pitchOffset.
+    set pitchEnd to obtPitch + pitchOffset.
   }
 
   local smoothPitch to smoothScalarBasedProgression(time:seconds, lastPitchUpdateTime, lastPitchUpdateTime + pitchUpdatePeriod * 4, pitchStart, pitchEnd).
@@ -132,7 +141,7 @@ until lastEcc < ship:orbit:eccentricity {
   print "etaRate: " + etaRate.
   print "tteta: " + tteta.
   print "ttcirc: " + ttcirc.
-  print "angleProgradeFromHorizon: " + angleProgradeFromHorizon.
+  print "obtPitch: " + obtPitch.
   print "pitchStart: " + pitchStart.
   print "pitchEnd: " + pitchEnd.
   print "pitchOffset: " + pitchOffset.
@@ -143,7 +152,7 @@ until lastEcc < ship:orbit:eccentricity {
   print "lanROC: " + lanROC.
   print "hdngOffset: " + hdngOffset.
 
-  lock steering to lookdirup(heading(hdng + hdngOffset, smoothPitch):vector, ship:facing:topvector).
+  lock steering to lookdirup(heading(obtHdng + hdngOffset, smoothPitch):vector, ship:facing:topvector).
 
   print "-----------------------------------------------------------------------------".
 
