@@ -15,3 +15,18 @@ function smoothScalarBasedTurn {
     return lookdirup(pointVec, upVec).
   }
 }
+
+function smoothScalarBasedProgression {
+  // TODO: allow endIn < startIn
+  // (e.g. start a high altitude, finish at low altitude)
+  parameter curIn, startIn, endIn, startOut, endOut.
+
+  if curIn < startIn {
+    return startOut.
+  } else if curIn > endIn {
+    return endOut.
+  } else {
+    local frac to (curIn - startIn) / (endIn - startIn).
+    return frac * endOut + (1 - frac) * startOut.
+  }
+}
