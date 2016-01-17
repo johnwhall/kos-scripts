@@ -67,15 +67,16 @@ until ship:q < 0.75 * maxQ {
 }
 
 local startAlt to ship:altitude.
-lock steering to smoothScalarBasedTurn(ship:altitude, startAlt, 100000,
-                                       ship:velocity:surface, ship:velocity:orbit,
-                                       ship:facing:topvector).
-
-// Limit acceleration (doesn't limit to exactly 5g, but it's close enough)
-lock throttle to max(0, min(1, mass * 5 * 9.82 / max(0.1, maxthrust))).
-
 local igEs to ignitedEngines().
-wait until engineFlamedOut(igEs).
+until engineFlamedOut(igEs) {
+  lock steering to smoothScalarBasedTurn(ship:altitude, startAlt, 50000,
+                                         ship:velocity:surface, ship:velocity:orbit,
+                                         ship:facing:topvector).
+
+  // Limit acceleration (doesn't limit to exactly 5g, but it's close enough)
+  lock throttle to max(0, min(1, mass * 5 * 9.82 / max(0.1, maxthrust))).
+}
+
 stage.
 wait 3.
 

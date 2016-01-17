@@ -19,6 +19,7 @@ public class LambertOptimizer {
 	private double _dtMin;
 	private double _dtMax;
 	private double _dtStep;
+	private boolean _allowLob;
 
 	// Calculated
 	private Vector3D _dv1;
@@ -28,7 +29,7 @@ public class LambertOptimizer {
 
 	public LambertOptimizer(double mu, OrbitAtTime oat0, OrbitAtTime tgtOat0,
 			double tMin, double tMax, double tStep,
-			double dtMin, double dtMax, double dtStep) {
+			double dtMin, double dtMax, double dtStep, boolean allowLob) {
 		_mu = mu;
 		_tgtOat0 = tgtOat0;
 		_oat0 = oat0;
@@ -38,6 +39,7 @@ public class LambertOptimizer {
 		_dtMin = dtMin;
 		_dtMax = dtMax;
 		_dtStep = dtStep;
+		_allowLob = allowLob;
 	}
 
 	public void execute() {
@@ -62,6 +64,14 @@ public class LambertOptimizer {
 					Vector3D dv1 = v1.subtract(oatAtBurn1.getVelocityVector());
 					Vector3D dv2 = tgtOatAtIntercept.getVelocityVector().subtract(v2);
 					double dv = dv1.getNorm(); // + dv2.getNorm();
+
+					if (!_allowLob) {
+						double a = 1 / ((2 / r1.getNorm()) - (v1.getNormSq() / _mu));
+						Vector3D eVec = (v1.crossProduct(r1.crossProduct(v1))).scalarMultiply(1 / _mu).subtract(r1.normalize());
+						double e = eVec.getNorm();
+						double apoapsis = a * (1 + e);
+						if (apoapsis > r2.getNorm()) continue;
+					}
 
 					if (dv < bestDV) {
 						_dv1 = dv1;
@@ -125,6 +135,8 @@ public class LambertOptimizer {
 		double dtMax = Double.parseDouble(requestArgs.get(17));
 		double dtStep = Double.parseDouble(requestArgs.get(18));
 
+		boolean allowLob = Boolean.parseBoolean(requestArgs.get(19));
+
 		System.out.println("mu = " + mu);
 		System.out.println("r1 = " + r1);
 		System.out.println("v1 = " + v1);
@@ -136,8 +148,9 @@ public class LambertOptimizer {
 		System.out.println("dtMin = " + dtMin);
 		System.out.println("dtMax = " + dtMax);
 		System.out.println("dtStep = " + dtStep);
+		System.out.println("allowLob = " + allowLob);
 
-		LambertOptimizer lo = new LambertOptimizer(mu, oat0, tgtOat0, tMin, tMax, tStep, dtMin, dtMax, dtStep);
+		LambertOptimizer lo = new LambertOptimizer(mu, oat0, tgtOat0, tMin, tMax, tStep, dtMin, dtMax, dtStep, allowLob);
 		lo.execute();
 
 		Vector3D dv1 = lo.getDV1();

@@ -13,10 +13,11 @@ function angleToPrograde {
   // bb = body's body (for ship orbiting earth: sun)
   // b = body (for ship orbiting earth: earth)
 
+  parameter p_body.
   parameter p_bcShipPos.
 
-  local bcBBPos to body:body:position - body:position.
-  local bcBPro to body:orbit:velocity:orbit.
+  local bcBBPos to p_body:body:position - p_body:position.
+  local bcBPro to p_body:orbit:velocity:orbit.
 
   local bObtNrml to vcrs(bcBBPos, bcBPro).
   local bcShipProjOntoPlane to vxcl(bObtNrml, p_bcShipPos).
@@ -36,7 +37,7 @@ function timeToAngleToPrograde {
   // around sun).
   parameter p_tgtAngle.
 
-  local curAngle to angleToPrograde(ship:position - body:position).
+  local curAngle to angleToPrograde(body, ship:position - body:position).
   local tgtAngle to p_tgtAngle.
   set g_libangletoprograde_callback_tgtAngle to tgtAngle.
 

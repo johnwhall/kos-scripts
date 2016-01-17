@@ -16,30 +16,18 @@ function waitForExists {
   }
 }
 
-function waitForNotExists {
-  parameter p_fname.
-
-  until false {
-    local fs to list().
-    list files in fs.
-    local done to true.
-    for f in fs {
-      if f:name = p_fname {
-        set done to false.
-      }
-    }
-    if done { return. }
-    else { wait 0.25. }
-  }
-}
-
 global g_libmainframe_nextRequestNum to 1.
 
 function mainframeClean {
   run deleteifexists("libmainframe_result_done.txt").
-  run deleteifexists("libmainframe_result_" + g_libmainframe_nextRequestNum + ".ks").
   run deleteifexists("libmainframe_request_done.txt").
   run deleteifexists("libmainframe_request.txt").
+
+  local i to 1.
+  until i > 10 {
+    run deleteifexists("libmainframe_result_" + i + ".ks").
+    set i to i + 1.
+  }
 }
 
 function mainframePrep {
@@ -50,8 +38,8 @@ function mainframePrep {
 function mainframeFinish {
   log "done" to libmainframe_request_done.txt.
 
-  waitForNotExists("libmainframe_request_done.txt").
   waitForExists("libmainframe_result_done.txt").
+  wait 0.25. // give the mainframe a chance to clean up
 
   if g_libmainframe_nextRequestNum = 1 {
     run libmainframe_result_1.ks.
@@ -105,6 +93,7 @@ function mainframeLambertOptimizeVecs {
   parameter p_dtMin.
   parameter p_dtMax.
   parameter p_dtStep.
+  parameter p_allowLob.
 
   mainframePrep().
 
@@ -133,6 +122,8 @@ function mainframeLambertOptimizeVecs {
   log p_dtMax to libmainframe_request.txt.
   log p_dtStep to libmainframe_request.txt.
 
+  log p_allowLob to libmainframe_request.txt.
+
   return mainframeFinish().
 }
 
@@ -145,6 +136,7 @@ function mainframeLambertOptimize {
   parameter p_dtMin.
   parameter p_dtMax.
   parameter p_dtStep.
+  parameter p_allowLob.
 
   local b to p_s1:body.
   if p_s2:body <> b {
@@ -180,6 +172,8 @@ function mainframeLambertOptimize {
   log p_dtMin to libmainframe_request.txt.
   log p_dtMax to libmainframe_request.txt.
   log p_dtStep to libmainframe_request.txt.
+
+  log p_allowLob to libmainframe_request.txt.
 
   return mainframeFinish().
 }

@@ -1,5 +1,4 @@
-run once funs.
+run once libtimetotrueanom.
+run once liblambertoptimize.
 
-print altitude.
-print trueAlt().
-print currentTWR().
+print lambertOptimizeBounded(ship, moon, 8326.77, 8326.77).

@@ -12,6 +12,7 @@ function warpFor1 {
       set i to i - 1.
     } else {
       set warp to i.
+      set warpmode to "RAILS".
       wait 0.1.
     }
   }

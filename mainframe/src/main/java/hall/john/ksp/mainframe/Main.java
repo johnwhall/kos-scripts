@@ -24,8 +24,6 @@ public class Main {
 				Thread.sleep(250);
 			}
 
-			Files.delete(KSP_REQUEST_DONE_PATH);
-
 			List<String> lines = Files.readAllLines(KSP_REQUEST_PATH);
 			int requestNum = Integer.parseInt(lines.get(0));
 			String requestType = lines.get(1);
@@ -51,6 +49,8 @@ public class Main {
 			}
 
 			try (FileOutputStream fos = new FileOutputStream(KSP_RESULT_DONE_FILE)) { }
+
+			Thread.sleep(1000); // wait for kOS to delete the request done file
 
 		}
 	}
