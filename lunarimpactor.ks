@@ -1,5 +1,6 @@
 @lazyglobal off.
 
+run once libfacediff.
 run once libwarpfor.
 run once libwaitforlan.
 run once libmainframe.
@@ -64,7 +65,7 @@ mainframeClean().
 
 waitForLAN(0).
 
-wait 1.
+wait 10.
 
 run launch(5, 55).
 
@@ -97,13 +98,25 @@ wait 1.
 local tliResult to lambertOptimize(ship, moon, false).
 burnToIntercept(tliResult).
 
-//local tt120 to timeToTrueAnom(120).
-//local tt270 to timeToTrueAnom(270).
-//local corrResult to lambertOptimizeBounded(ship, moon, tt120, tt120, 0, tt270 - tt120, false).
-//burnToIntercept(corrResult).
+if ship:orbit:nextpatch:periapsis > 0 {
+  local tt120 to timeToTrueAnom(120).
+  local tt270 to timeToTrueAnom(270).
+  local corrResult to lambertOptimizeBounded(ship, moon, tt120, tt120, 0, tt270 - tt120, false).
+  burnToIntercept(corrResult).
+}
 
 warpFor1(eta:transition - 10).
 wait until ship:body = moon.
+
+if ship:orbit:periapsis > 0 {
+  lock steering to vcrs(vcrs(ship:orbit:position, ship:orbit:velocity:orbit), ship:orbit:velocity:orbit).
+  wait until faceDiff() < 0.5.
+  lock throttle to 1.
+  wait until ship:orbit:periapsis < -1000.
+  unlock throttle.
+  unlock steering.
+}
+
 warpFor1(eta:periapsis - 15 * 60).
 set warp to 1.
 wait until altitude < 200000.
