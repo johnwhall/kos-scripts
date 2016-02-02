@@ -10,6 +10,8 @@ import hall.john.ksp.mainframe.numericalmethods.BrentsMethod;
 
 public class LambertSolver {
 	// Converted from https://alexmoon.github.io/ksp/javascripts/lambert.js
+	// Originally Based on Sun, F.T. "On the Minium Time Trajectory and Multiple Solutions of Lambert's Problem"
+	// AAS/AIAA Astrodynamics Conference, Provincetown, Massachusetts, AAS 79-164, June 25-27, 1979
 
 	public static double EPS = 1e-10;
 

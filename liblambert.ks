@@ -27,6 +27,8 @@ function relativeError {
 
 function lambertsProblem {
   // Converted from https://alexmoon.github.io/ksp/javascripts/lambert.js
+  // Originally Based on Sun, F.T. "On the Minium Time Trajectory and Multiple Solutions of Lambert's Problem"
+  // AAS/AIAA Astrodynamics Conference, Provincetown, Massachusetts, AAS 79-164, June 25-27, 1979
   parameter p_mu.
   parameter p_r1Vec.
   parameter p_r2Vec.
