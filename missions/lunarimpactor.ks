@@ -6,17 +6,17 @@ run once libwaitforlan.
 run once libmainframe.
 run once liblambertoptimize.
 run once libburntime.
-run once genericburn.funs.ks.
+run once libgenericburn.
 run once libtimetotrueanom.
 
 function burnToIntercept {
   parameter lambertResult.
 
-  local t to lambertResult[0].
-  local pro to lambertResult[1].
-  local norm to lambertResult[2].
-  local rad to lambertResult[3].
-  local dt to lambertResult[4].
+  local t to lambertResult["t"].
+  local pro to lambertResult["prograde"].
+  local norm to lambertResult["normal"].
+  local rad to lambertResult["radial"].
+  local dt to lambertResult["dt"].
 
   print "t = " + t.
   print "pro = " + pro.
@@ -34,29 +34,25 @@ function burnToIntercept {
   local bt to burnTime1(nextnode:deltav:mag).
   local burnMidTime to time:seconds + nextnode:eta.
 
-  genericBurnWait(burnMidTime, bt, turnTime).
-
-  local state to list().
-  genericBurnStart(nextnode:deltav, burnMidTime, bt, turnTime,
-                   ullageTime, ts, nextnode:deltav:mag, state).
-
-  lock steering to lookdirup(nextnode:deltav, ship:facing:topvector).
-
-  wait until ship:orbit:transition = "ENCOUNTER".
-
-  local lastPeriapsis to ship:orbit:nextpatch:periapsis.
-  wait 0.05.
-
-  until ship:orbit:hasnextpatch { wait 0.05.  }
-  local curPeriapsis to ship:orbit:nextpatch:periapsis.
-  until curPeriapsis > lastPeriapsis {
-    set lastPeriapsis to curPeriapsis.
-    wait 0.05.
-    until ship:orbit:hasnextpatch { wait 0.05.  }
-    set curPeriapsis to ship:orbit:nextpatch:periapsis.
+  function cb {
+    local soirad to moon:soiradius.
+    local moonrad to moon:radius.
+    if not ship:orbit:hasnextpatch {
+      // wait until we have an encounter
+      return 1.
+    } else {
+      until ship:orbit:hasnextpatch { wait 0.05. }
+      local per to ship:orbit:nextpatch:periapsis.
+      if per > soirad / 2 {
+        // wait until the patch becomes stable enough to measure
+        return 1.
+      } else {
+        return (per + moonrad) / soirad.
+      }
+    }
   }
 
-  genericBurnStop(state).
+  genericBurn(nextnode:deltav, burnMidTime, bt, turnTime, ullageTime, ts, cb@).
 
   remove nextnode.
 }
