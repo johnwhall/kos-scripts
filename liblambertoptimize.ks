@@ -52,20 +52,20 @@ function lambertOptimizeBounded {
 
   local startTime to time:seconds.
 
-  local res to 0.
+  local res to lexicon().
 
   until tStep <= 1/49 and dtStep <= 1/49 {
 	  set tStep to max(1, tStep).
 	  set dtStep to max(1, dtStep).
 
 	  set res to doOnce(b:mu, rv1, rv2, tMid, tStep, dtMid, dtStep, p_allowLob).
-	  set tMid to res[0].
-	  set dtMid to res[4].
+	  set tMid to res["t"].
+	  set dtMid to res["dt"].
 	  set tStep to tStep / 50.
 	  set dtStep to dtStep / 50.
   }
 
-  set res[0] to res[0] - (time:seconds - startTime).
+  set res["t"] to res["t"] - (time:seconds - startTime).
 
   return res.
 }
@@ -81,3 +81,11 @@ function lambertOptimize {
 
   return lambertOptimizeBounded(p_s1, p_s2, 0, synodicPeriod, dtMin, dtMax, p_allowLob).
 }
+
+//local res to lambertOptimize(ship, moon, false).
+//local t to res["t"].
+//local dt to res["dt"].
+//local pro to res["prograde"].
+//local norm to res["normal"].
+//local rad to res["radial"].
+//add node(time:seconds + t, rad, norm, pro).

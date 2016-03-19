@@ -1,6 +1,8 @@
 package hall.john.ksp.mainframe;
 
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 
@@ -101,7 +103,7 @@ public class LambertOptimizer {
 		return _dt;
 	}
 
-	public static String mainframe(List<String> requestArgs) {
+	public static Map<String, Object> mainframe(List<String> requestArgs) {
 		double mu = Double.parseDouble(requestArgs.get(0));
 		Body b = new Body("mfBody", mu);
 
@@ -166,8 +168,13 @@ public class LambertOptimizer {
 		System.out.println("dt = " + dt);
 
 		ManeuverNode node = new ManeuverNode(oat0.afterTime(t), dv1);
-		String str = "list(" + t + ", " + node.getPrograde() + ", " + node.getNormal() + ", " + node.getRadial() + ", " + dt + ")";
-		return str;
 
+		Map<String, Object> result = new HashMap<String, Object>();
+		result.put("t", t);
+		result.put("dt", dt);
+		result.put("prograde", node.getPrograde());
+		result.put("normal", node.getNormal());
+		result.put("radial", node.getRadial());
+		return result;
 	}
 }
