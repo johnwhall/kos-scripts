@@ -1,6 +1,6 @@
 @lazyglobal off.
 
-run once libphaseangle_callback.
+run once libabsdiffmod.
 run once libsecantmethod.
 
 function phaseAngle {
@@ -27,20 +27,26 @@ function timeToPhaseAngle {
   parameter p_tgt.
 
   local curAngle to phaseAngle(time:seconds, p_tgt).
-  local tgtAngle to p_tgtAngle.
 
-  set g_libphaseangle_callback_tgtAngle to tgtAngle.
-  set g_libphaseangle_callback_tgt to p_tgt.
-
-  local deltaAngle to curAngle - tgtAngle.
+  local deltaAngle to curAngle - p_tgtAngle.
   if deltaAngle < 0 {
     set deltaAngle to 360 + deltaAngle.
+  }
+
+  function cb {
+    parameter p_deltaTimeGuess.
+
+    local timeGuess to time:seconds + p_deltaTimeGuess.
+    local guessSCShipPos to positionat(ship, timeGuess).
+    local guessBCShipPos to guessSCShipPos - body:position.
+    local guessAngle to phaseAngle(timeGuess, p_tgt).
+    return absDiffMod(guessAngle, p_tgtAngle, 360).
   }
 
   local synodicPeriod to 1 / ((1 / ship:orbit:period) - (1 / p_tgt:orbit:period)).
   local guess1 to deltaAngle / (360 / synodicPeriod).
   local guess2 to guess1 + 100.
-  local result to secantMethod("libphaseangle_callback", guess1, guess2, 10, 1e-2).
+  local result to secantMethod(cb@, guess1, guess2, 10, 1e-2).
 
   return result.
 }

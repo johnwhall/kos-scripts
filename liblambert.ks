@@ -1,22 +1,23 @@
 @lazyglobal off.
 
 run once libradtrig.
-run once liblambert_callback_fy.
-run once liblambert_callback_ftau.
-run once liblambert_callback_anon1.
-run once liblambert_callback_anon2.
 run once libbrentsmethod.
 
 local eps to 1e-10.
 
-function fy {
+function phix {
   parameter p_x.
-  return liblambert_callback_fy_function(p_x).
+  if p_x = 0 { set p_x to 1e-10. }
+  if p_x = 1 { set p_x to 1 - 1e-10. }
+  local g to sqrt(1 - p_x^2).
+  return radarccot(p_x / g) - (2 + p_x^2) * g / (3 * p_x).
 }
 
-function ftau {
-  parameter p_x.
-  return liblambert_callback_ftau_function(p_x).
+function phiy {
+  parameter p_y.
+  if p_y = 0 { set p_y to 1e-10. }
+  local h to sqrt(1 - p_y^2).
+  return radarctan(h / p_y) - (2 + p_y^2) * h / (3 * p_y).
 }
 
 function relativeError {
@@ -57,24 +58,61 @@ function lambertsProblem {
   if transferAngle > constant:pi {
     set angleParameter to -angleParameter.
   }
-  set g_liblambert_callback_fy_angleParameter to angleParameter.
+
+  function fy {
+    parameter p_x.
+
+    local y to sqrt(1 - (angleParameter^2) * (1 - p_x * p_x)).
+    if angleParameter < 0 {
+      return -y.
+    } else {
+      return y.
+    }
+  }
 
   local normalizedTime to 4 * p_dt * sqrt(p_mu / m^3).
   local parabolicNormalizedTime to 2 / 3 * (1 - angleParameter * angleParameter * angleParameter).
-  set g_liblambert_callback_ftau_normalizedTime to normalizedTime.
-  set g_liblambert_callback_ftau_parabolicNormalizedTime to parabolicNormalizedTime.
-
   local NRev to 0.
 
-  function syncNRev {
-    parameter p_NRev.
-    set NRev to p_NRev.
-    set g_liblambert_callback_ftau_NRev to NRev.
-    set g_liblambert_callback_anon1_NRev to NRev.
-    set g_liblambert_callback_anon2_NRev to NRev.
+  function fy {
+    parameter p_x.
+
+    local y to sqrt(1 - (angleParameter^2) * (1 - p_x * p_x)).
+    if angleParameter < 0 {
+      return -y.
+    } else {
+      return y.
+    }
   }
 
-  syncNRev(0).
+  function ftau {
+    parameter p_x.
+
+    if p_x = 1 {
+      return parabolicNormalizedTime - normalizedTime.
+    } else {
+      local y to fy(p_x).
+      if p_x > 1 {
+        local g to sqrt(p_x^2 - 1).
+        local h to sqrt(y^2 - 1).
+        return (-radarccoth(p_x / g) + radarccoth(y / h) + p_x * g - y * h) / (g * g * g) - normalizedTime.
+      } else {
+        local g to sqrt(1 - p_x^2).
+        local h to sqrt(1 - y^2).
+        return (radarccot(p_x / g) - radarctan(h / y) - p_x * g + y * h + NRev * constant:pi) / (g * g * g) - normalizedTime.
+      }
+    }
+  }
+
+  function brentAnon1 {
+    parameter p_x.
+    return phix(p_x) + NRev * constant:pi.
+  }
+
+  function brentAnon2 {
+    parameter p_x.
+    return phix(p_x) - phiy(fy(p_x)) + NRev * constant:pi.
+  }
 
   local sqrtMu to sqrt(mu).
 
@@ -133,7 +171,7 @@ function lambertsProblem {
       set x1 to x2.
       set x2 to x2 * 2.
     }
-    local x to brentsMethod("liblambert_callback_ftau", x1, x2, 100, 1e-4)[1].
+    local x to brentsMethod(ftau@, x1, x2, 100, 1e-4)[1].
     pushSolution(x, fy(x), NRev).
   } else {
     local maxRevs to min(p_maxRevs, floor(normalizedTime / constant:pi)).
@@ -143,7 +181,7 @@ function lambertsProblem {
 //    print "minimumEnergyNormalizedTime = " + minimumEnergyNormalizedTime.
 
     local _i to 0.
-    syncNRev(_i).
+    set NRev to _i.
     until abs(_i) > abs(maxRevs) {
 //      print "_i = " + _i.
 //      print "NRev = " + NRev.
@@ -155,10 +193,10 @@ function lambertsProblem {
           set xMT to 0.
           set minimumNormalizedTime to minimumEnergyNormalizedTime.
         } else if angleParameter = 0 {
-          set xMT to brentsMethod("liblambert_callback_anon1", 0, 1, 100, 1e-4)[1].
+          set xMT to brentsMethod(brentAnon1@, 0, 1, 100, 1e-4)[1].
           set minimumNormalizedTime to 2 / (3 * xMT).
         } else {
-          set xMT to brentsMethod("liblambert_callback_anon2", 0, 1, 100, 1e-4)[1].
+          set xMT to brentsMethod(brentAnon2@, 0, 1, 100, 1e-4)[1].
           set minimumNormalizedTime to (2 / 3) * (1 / xMT - angleParameter^3 / abs(fy(xMT))).
         }
 
@@ -168,10 +206,10 @@ function lambertsProblem {
         } else if (normalizedTime < minimumNormalizedTime) {
           break.
         } else if (normalizedTime < minimumEnergyNormalizedTime) {
-          local ret to brentsMethod("liblambert_callback_ftau", 0, xMT, 100, 1e-4).
+          local ret to brentsMethod(ftau@, 0, xMT, 100, 1e-4).
           pushIfConverged(ret, NRev).
 
-          set ret to brentsMethod("liblambert_callback_ftau", xMT, 1 - eps, 100, 1e-4).
+          set ret to brentsMethod(ftau@, xMT, 1 - eps, 100, 1e-4).
           pushIfConverged(ret, NRev).
           break.
         }
@@ -180,18 +218,18 @@ function lambertsProblem {
       if relativeError(normalizedTime, minimumEnergyNormalizedTime) < 1e-6 {
         pushSolution(0, fy(0), NRev).
         if NRev > 0 {
-          local ret to brentsMethod("liblambert_callback_ftau", 1e-6, 1 - eps, 100, 1e-4).
+          local ret to brentsMethod(ftau@, 1e-6, 1 - eps, 100, 1e-4).
           pushIfConverged(ret, NRev).
         }
       } else {
         if NRev > 0 or normalizedTime > minimumEnergyNormalizedTime {
 //          print "A".
-          local ret to brentsMethod("liblambert_callback_ftau", -1 + eps, 0, 100, 1e-4).
+          local ret to brentsMethod(ftau@, -1 + eps, 0, 100, 1e-4).
           pushIfConverged(ret, NRev).
         }
         if NRev > 0 or normalizedTime < minimumEnergyNormalizedTime {
 //          print "B".
-          local ret to brentsMethod("liblambert_callback_ftau", 0, 1 - eps, 100, 1e-4).
+          local ret to brentsMethod(ftau@, 0, 1 - eps, 100, 1e-4).
 //          print ret.
           pushIfConverged(ret, NRev).
         }
@@ -204,31 +242,31 @@ function lambertsProblem {
       } else {
         set _i to _i - 1.
       }
-      syncNRev(_i).
+      set NRev to _i.
     }
   }
   return solutions.
 }
 
-function vecrot {
-  parameter p_vec.
-  parameter angleDeg.
+//function vecrot {
+//  parameter p_vec.
+//  parameter angleDeg.
 
-  return V(p_vec:x * cos(angleDeg) - p_vec:y * sin(angleDeg), p_vec:x * sin(angleDeg) + p_vec:y * cos(angleDeg), p_vec:z).
-}
+//  return V(p_vec:x * cos(angleDeg) - p_vec:y * sin(angleDeg), p_vec:x * sin(angleDeg) + p_vec:y * cos(angleDeg), p_vec:z).
+//}
 
-local mu to 398603 * 1000^3.
-local r1Vec to V(10000000, 0, 0).
-local r2Vec to vecrot(1.6 * r1Vec, 100).
-local i to 0.
-until i >= 100 {
-  print i.
-  local sols to lambertsProblem(mu, r1Vec, r2Vec, 3072, 0, true).
-  set i to i + 1.
-}
+//local mu to (398603 + 1e-6) * 1000^3. // +1e-6 to work around https://github.com/KSP-KOS/KOS/issues/1553
+//local r1Vec to V(10000000, 0, 0).
+//local r2Vec to vecrot(1.6 * r1Vec, 100).
+//local i to 0.
+//until i >= 100 {
+//  print i.
+//  local sols to lambertsProblem(mu, r1Vec, r2Vec, 3072, 0, true).
+//  set i to i + 1.
+//}
 //print sols.
 
 //local r2Vec2 to vecrot(1.6 * r1Vec, 260).
 //print r2Vec2.
-//set sols to lambertsProblem(mu, r1Vec, r2Vec2, 31645, 3, false).
+//local sols to lambertsProblem(mu, r1Vec, r2Vec2, 31645, 3, false).
 //print sols.

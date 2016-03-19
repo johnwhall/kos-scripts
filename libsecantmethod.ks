@@ -1,9 +1,7 @@
 @lazyglobal off.
 
-run once libcallback.
-
 function secantMethod {
-  parameter p_cbScript.
+  parameter p_f.
   parameter p_x0.
   parameter p_x1.
   parameter p_maxIter.
@@ -12,13 +10,13 @@ function secantMethod {
   local xnm2 to p_x0.
   local xnm1 to p_x1.
 
-  local fxnm1 to doCallbackR1(p_cbScript, xnm1).
-  local fxnm2 to doCallbackR1(p_cbScript, xnm2).
+  local fxnm1 to p_f(xnm1).
+  local fxnm2 to p_f(xnm2).
 
   local iter to 1.
   until iter > p_maxIter {
     local x to xnm1 - fxnm1 * (xnm1 - xnm2) / (fxnm1 - fxnm2).
-    local fx to doCallbackR1(p_cbScript, x).
+    local fx to p_f(x).
 
     if abs(fx) < p_tol {
       return x.
@@ -35,9 +33,14 @@ function secantMethod {
   exit.
 }
 
-//run once libsecantmethod_callback.
-//local x to secantMethod("libsecantmethod_callback", 10, 30, 7, 1e-5).
+//function testFun {
+//  parameter p_offset.
+//  parameter p_x.
+//  print "Evaluating f(" + p_x + ").".
+//  return p_x^2 - p_offset.
+//}
+
+//local x to secantMethod(testFun@:bind(612), 10, 30, 7, 1e-5).
 //print x.
-//set g_libsecantmethod_callback_offset to 700.
-//local x to secantMethod("libsecantmethod_callback", 10, 30, 7, 1e-5).
+//local x to secantMethod(testFun@:bind(700), 10, 30, 7, 1e-5).
 //print x.

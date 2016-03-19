@@ -1,7 +1,7 @@
 @lazyglobal off.
 
+run once libabsdiffmod.
 run once libsecantmethod.
-run once libangletoprograde_callback.
 
 function angleToPrograde {
   // This is slightly inaccurate due to the fact that it doesn't account for the
@@ -38,17 +38,23 @@ function timeToAngleToPrograde {
   parameter p_tgtAngle.
 
   local curAngle to angleToPrograde(body, ship:position - body:position).
-  local tgtAngle to p_tgtAngle.
-  set g_libangletoprograde_callback_tgtAngle to tgtAngle.
 
-  local deltaAngle to curAngle - tgtAngle.
+  function cb {
+    parameter p_deltaTimeGuess.
+    local guessSCShipPos to positionat(ship, time:seconds + p_deltaTimeGuess).
+    local guessBCShipPos to guessSCShipPos - body:position.
+    local guessAngle to angleToPrograde(body, guessBCShipPos).
+    return absDiffMod(guessAngle, p_tgtAngle, 360).
+  }
+
+  local deltaAngle to curAngle - p_tgtAngle.
   if deltaAngle < 0 {
     set deltaAngle to deltaAngle + 360.
   }
 
   local guess1 to deltaAngle / (360 / ship:obt:period).
   local guess2 to guess1 + 100.
-  local result to secantMethod("libangletoprograde_callback", guess1, guess2, 10, 1e-2).
+  local result to secantMethod(cb@, guess1, guess2, 10, 1e-2).
 
   return result.
 }
@@ -60,8 +66,8 @@ function timeToAngleToPrograde {
 //local scShipPosAt to positionat(ship, time:seconds + ttatp).
 //local bcShipPosAt to scShipPosAt - body:position.
 //
-//print "Current ATP: " + angleToPrograde(ship:position - body:position).
+//print "Current ATP: " + angleToPrograde(body, ship:position - body:position).
 //print "Target ATP: " + tgtAngle.
 //print "Time to Target: " + ttatp.
 //print "Position at Target Time: " + scShipPosAt.
-//print "Calculated ATP: " + angleToPrograde(bcShipPosAt).
+//print "Calculated ATP: " + angleToPrograde(body, bcShipPosAt).
