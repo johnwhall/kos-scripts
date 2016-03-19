@@ -1,11 +1,6 @@
 @lazyglobal off.
 
-parameter fname.
+parameter p_fname.
 
-local fs to list().
-list files in fs.
-for f in fs {
-  if f:name = fname {
-    delete f.
-  }
-}
+log "" to p_fname.
+delete p_fname.
