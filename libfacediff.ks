@@ -1,5 +1,7 @@
 @lazyglobal off.
 
+run once libabsdiffmod.
+
 function faceDiff {
   // assumes steering is a rotation, not a vector
 

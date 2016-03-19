@@ -1,20 +1,17 @@
 @lazyglobal off.
 
-run once funs.
-run once genericburn.funs.ks.
+parameter p_turnTime, p_ullageTime, p_ts.
 
-parameter param_turnTime, param_ullageTime, param_ts.
+run once libburntime.
+run once libgenericburn.
 
 local bt to burnTime1(nextnode:deltav:mag).
 local burnMidTime to time:seconds + nextnode:eta.
 
-genericBurnWait(burnMidTime, bt, param_turnTime).
+function nnDV {
+  return nextnode:deltav:mag.
+}
 
-local state to list().
-genericBurnStart(nextnode:deltav, burnMidTime, bt, param_turnTime,
-                 param_ullageTime, param_ts, nextnode:deltav:mag, state).
+genericBurn(nextnode:deltav, burnMidTime, bt, p_turnTime, p_ullageTime, p_ts, nnDV@).
 
-wait until not genericBurnContinue(nextnode:deltav, nextnode:deltav:mag, state).
-
-genericBurnStop(state).
 remove nextnode.
