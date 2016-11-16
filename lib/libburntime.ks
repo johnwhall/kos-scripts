@@ -1,6 +1,6 @@
 @lazyglobal off.
 
-run once libisp.
+runoncepath("lib/libisp").
 
 function burnTime1 {
   parameter dv.

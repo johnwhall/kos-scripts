@@ -1,7 +1,7 @@
 @lazyglobal off.
 
-run once libabsdiffmod.
-run once libsecantmethod.
+runoncepath("lib/libabsdiffmod").
+runoncepath("lib/libsecantmethod").
 
 function angleToPrograde {
   // This is slightly inaccurate due to the fact that it doesn't account for the

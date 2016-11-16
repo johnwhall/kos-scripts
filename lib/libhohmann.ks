@@ -1,6 +1,6 @@
 @lazyglobal off.
 
-run once libphaseangle.
+runoncepath("lib/libphaseangle").
 
 function nodeForHohmannTransfer {
   parameter tgt.

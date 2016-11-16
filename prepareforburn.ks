@@ -1,33 +1,43 @@
 @lazyglobal off.
 
-run once funs.
+parameter pointVec, burnMidTime, burnTime, settleFuel.
 
-parameter pointVec, burnMidTime, burnTime, settleFuel, ts.
+function timeStr {
+  parameter t.
+  return t + " (" + (t - time:seconds) + " from now)".
+}
 
-local oldPitchTS to steeringmanager:pitchts.
-local oldYawTS to steeringmanager:yawts.
-set steeringmanager:pitchts to ts.
-set steeringmanager:yawts to ts.
+runoncepath("lib/libwaitforfacing").
+runoncepath("lib/libwarpfor").
 
 local lock timeToBurnMid to burnMidTime - time:seconds.
-
-warpFor1(timeToBurnMid - burnTime - 90).
-
-lock steering to lookdirup(pointVec, ship:facing:topvector).
-wait until faceDiff() < 5.
-
-set steeringmanager:pitchts to oldPitchTS.
-set steeringmanager:yawts to oldYawTS.
-wait until faceDiff() < 0.5.
-
 local settleTime to 0.
 if settleFuel { set settleTime to 5. }
 
+print "Preparing for burn".
+print "Current Time: " + time:seconds.
+print "Point Vec: " + pointVec.
+print "Burn Times:".
+print "  Duration: " + burnTime.
+print "  Start   : " + timeStr(burnMidTime - burnTime / 2).
+print "  Middle  : " + timeStr(burnMidTime).
+print "  End     : " + timeStr(burnMidTime + burnTime / 2).
+print "Settle Time: " + settleTime.
+
+warpFor1(timeToBurnMid - burnTime - 150).
+
+lock steering to lookdirup(pointVec, ship:facing:topvector).
+waitForFacing(0.5, false).
+
+print "Facing reached at " + time:seconds.
+
+print "Warping for " + (timeToBurnMid - (burnTime / 2) - settleTime).
 warpFor1(timeToBurnMid - (burnTime / 2) - settleTime).
 
 wait until timeToBurnMid - settleTime < (burnTime / 2).
 
 if settleFuel {
+  print "Settling fuel at " + time:seconds.
   local prevRCS to rcs.
   rcs on.
   set ship:control:fore to 1.
@@ -35,3 +45,5 @@ if settleFuel {
   set ship:control:fore to 0.
   set rcs to prevRCS.
 }
+
+print "Ready for burn at " + time:seconds.

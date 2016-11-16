@@ -4,27 +4,29 @@ parameter where.
 parameter tgtApo. // not including body radius
 parameter settleFuel.
 
-run once funs.
+runoncepath("/lib/libburntime").
+runoncepath("/lib/libtimeto").
 
-local timeToBurnMid to 0.
-if (where = "per" or where = "peri" or where = "periapsis") {
-  lock timeToBurnMid to eta:periapsis.
-} else if (where = "anode") {
-  // assumes current orbit is circular
-  lock timeToBurnMid to timetoTrueAnom(360 - ship:obt:argumentofperiapsis).
-} else if (where = "dnode") {
-  // assumes current orbit is circular
-  lock timeToBurnMid to timetoTrueAnom(360 - ship:obt:argumentofperiapsis).
-} else {
-  print "Invalid where: " + where.
-  exit.
-}
+local targetTime to time:seconds + timeTo1(where, list("per", "anode", "dnode")).
 
 local tgtSMA to (ship:obt:periapsis + tgtApo + 2 * body:radius) / 2.
 local v to sqrt(body:mu * (2 / (ship:obt:periapsis + body:radius) - 1 / ship:obt:semimajoraxis)).
 local tgtV to sqrt(body:mu * (2 / (ship:obt:periapsis + body:radius) - 1 / tgtSMA)).
 local dv to abs(tgtV - v).
 local bt to burnTime1(dv).
+local halfDVTime to burnTime1(dv / 2).
+
+local burnStartTime to targetTime - halfDVTime.
+local burnEndTime to burnStartTime + bt.
+local burnMidTime to (burnStartTime + burnEndTime) / 2.
+
+print "current time = " + time:seconds.
+print "targetTime = " + targetTime.
+print "bt = " + bt.
+print "halfDVTime = " + halfDVTime.
+print "burnStartTime = " + burnStartTime.
+print "burnMidTime = " + burnMidTime.
+print "burnEndTime = " + burnEndTime.
 
 local throt to 0.
 lock throttle to throt.
@@ -36,16 +38,16 @@ if (tgtApo > ship:obt:apoapsis) {
   lock pointVec to prograde:vector.
 }
 
-run prepareForBurn(pointVec, time:seconds + timeToBurnMid, bt, settleFuel, 10).
+runpath("prepareForBurn", pointVec, burnMidTime, bt, settleFuel).
 lock steering to lookdirup(pointVec, ship:facing:topvector).
 
-local curDiff to 0.
-lock curDiff to abs(ship:obt:apoapsis - tgtApo).
-local lastDiff to curDiff.
+local cDiff to 0.
+lock cDiff to abs(ship:obt:apoapsis - tgtApo).
+local lastDiff to cDiff.
 set throt to 1.
 wait 0.1.
-until lastDiff < curDiff {
-  set lastDiff to curDiff.
+until lastDiff < cDiff {
+  set lastDiff to cDiff.
   wait 0.05.
 }
 

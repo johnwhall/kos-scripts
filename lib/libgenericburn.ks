@@ -1,9 +1,9 @@
 @lazyglobal off.
 
-run once libwarpfor.
-run once libsasrcsstack.
-run once libengine.
-run once libfacediff.
+runoncepath("lib/libwarpfor").
+runoncepath("lib/libsasrcsstack").
+runoncepath("lib/libengine").
+runoncepath("lib/libwaitforfacing").
 
 function genericBurn {
   parameter p_pointVec.
@@ -11,7 +11,6 @@ function genericBurn {
   parameter p_burnTime.
   parameter p_turnTime.
   parameter p_ullageTime.
-  parameter p_ts.
   parameter p_callback.
 
   lock throttle to 0.
@@ -21,19 +20,8 @@ function genericBurn {
 
   pushSAS(false).
 
-  // TODO: does changing pitchts and yawts actually help?
-  local oldPitchTS to steeringmanager:pitchts.
-  local oldYawTS to steeringmanager:yawts.
-  set steeringmanager:pitchts to p_ts.
-  set steeringmanager:yawts to p_ts.
-
   lock steering to lookdirup(p_pointVec, ship:facing:topvector).
-  wait until faceDiff() < 5.
-
-  // TODO: does changing pitchts and yawts actually help?
-  set steeringmanager:pitchts to oldPitchTS.
-  set steeringmanager:yawts to oldYawTS.
-  wait until faceDiff() < 0.5.
+  waitForFacing(0.5, false, false).
 
   warpFor1(timeToBurnMid - (p_burnTime / 2) - p_ullageTime).
   wait until timeToBurnMid - p_ullageTime < (p_burnTime / 2).

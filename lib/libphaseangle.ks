@@ -1,7 +1,7 @@
 @lazyglobal off.
 
-run once libabsdiffmod.
-run once libsecantmethod.
+runoncepath("lib/libabsdiffmod").
+runoncepath("lib/libsecantmethod").
 
 function phaseAngle {
   parameter p_atTime.

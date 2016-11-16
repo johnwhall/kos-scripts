@@ -14,10 +14,11 @@ function timeToTrueAnom {
   parameter ta.
 
   local curE to eccAnomFromTrueAnom(ship:obt:trueanomaly).
-  local curMA to curE - ship:obt:eccentricity * sin(curE).
+  local curMA to (curE * constant:pi / 180 - ship:obt:eccentricity * sin(curE)) * 180 / constant:pi.
 
   local tgtE to eccAnomFromTrueAnom(ta).
   local tgtMA to tgtE - ship:obt:eccentricity * sin(tgtE).
+  local tgtMA to (tgtE * constant:pi / 180 - ship:obt:eccentricity * sin(tgtE)) * 180 / constant:pi.
   if (tgtMA < curMA) { set tgtMA to tgtMA + 360. }
 
   local deltaMA to tgtMA - curMA.

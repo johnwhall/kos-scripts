@@ -1,7 +1,7 @@
 @lazyglobal off.
 
-run once calc.funs.ks.
-run once funs.ks.
+runoncepath("lib/libcosinerule").
+runoncepath("lib/libmanat").
 
 function nodeToCircIncAtApo {
   parameter tgtInc.

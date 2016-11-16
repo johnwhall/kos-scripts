@@ -1,6 +1,6 @@
 @lazyglobal off.
 
-run once libsign.
+runoncepath("lib/libsign").
 
 function bisectionMethod {
   parameter p_f.

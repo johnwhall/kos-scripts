@@ -1,9 +1,9 @@
 @lazyglobal off.
 
-parameter p_turnTime, p_ullageTime, p_ts.
+parameter p_turnTime, p_ullageTime.
 
-run once libburntime.
-run once libgenericburn.
+runoncepath("lib/libburntime").
+runoncepath("lib/libgenericburn").
 
 local bt to burnTime1(nextnode:deltav:mag).
 local burnMidTime to time:seconds + nextnode:eta.
@@ -12,6 +12,6 @@ function nnDV {
   return nextnode:deltav:mag.
 }
 
-genericBurn(nextnode:deltav, burnMidTime, bt, p_turnTime, p_ullageTime, p_ts, nnDV@).
+genericBurn(nextnode:deltav, burnMidTime, bt, p_turnTime, p_ullageTime, nnDV@).
 
 remove nextnode.

@@ -1,6 +1,6 @@
 @lazyglobal off.
 
-run once libsign.
+runoncepath("lib/libsign").
 
 local eps to 1e-10.
 

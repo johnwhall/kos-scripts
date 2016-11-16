@@ -1,8 +1,15 @@
 @lazyglobal off.
 
-parameter initialTurnAngle, initialTurnStartSpeed.
+// LAN increases approx. 6 degrees during Cape Canaveral eastward launch
 
-run once funs.
+parameter initialTurnAngle, initialTurnStartSpeed, orbitalTurnEndAltitude, targetInclination, targetAltitude.
+
+runoncepath("lib/libengine").
+runoncepath("lib/libsmoothturn").
+runoncepath("lib/libburntime").
+
+local LOGFILE to "log/lastlaunch.log".
+deletepath(LOGFILE).
 
 function engineFlamedOut {
   parameter igEs.
@@ -13,6 +20,15 @@ function engineFlamedOut {
   }
   return false.
 }
+
+// Source: http://www.orbiterwiki.org/wiki/Launch_Azimuth
+local val to cos(targetInclination) / cos(ship:latitude).
+local betaInertial to arcsin(max(-1, min(1, cos(targetInclination) / cos(ship:latitude)))).
+local vEqRot to 2 * constant:pi * body:radius / body:rotationperiod.
+local vOrbit to sqrt(body:mu / (body:radius + targetAltitude)).
+local launchAzimuth to arctan((vOrbit * sin(betaInertial) -  vEqRot * cos(ship:latitude)) / (vOrbit * cos(betaInertial))).
+print "launch azimuth: " + launchAzimuth.
+log "launch azimuth: " + launchAzimuth to LOGFILE.
 
 local obtProProjOntoHorizon to 0.
 lock obtProProjOntoHorizon to ship:velocity:orbit - vdot(ship:velocity:orbit, up:vector) * up:vector.
@@ -50,15 +66,13 @@ lock steering to lookdirup(up:vector, ship:facing:topvector).
 
 wait until ship:verticalspeed > initialTurnStartSpeed.
 
-local launchHeading to 90.
-
-lock steering to smoothScalarBasedTurn(ship:verticalspeed, initialTurnStartSpeed, 80,
-                                       heading(launchHeading, 90):vector,
-                                       heading(launchHeading, 90 - initialTurnAngle):vector,
+lock steering to smoothScalarBasedTurn(ship:verticalspeed, initialTurnStartSpeed, initialTurnStartSpeed * 1.25,
+                                       heading(launchAzimuth, 90):vector,
+                                       heading(launchAzimuth, 90 - initialTurnAngle):vector,
                                        ship:facing:topvector).
 
 wait until vang(ship:velocity:surface, up:vector) > initialTurnAngle.
-lock steering to lookdirup(heading(launchHeading, srfPitch):vector, ship:facing:topvector).
+lock steering to lookdirup(heading(launchAzimuth, srfPitch):vector, ship:facing:topvector).
 
 local maxQ to ship:q.
 until ship:q < 0.75 * maxQ {
@@ -69,25 +83,26 @@ until ship:q < 0.75 * maxQ {
 local startAlt to ship:altitude.
 local igEs to ignitedEngines().
 until engineFlamedOut(igEs) {
-  lock steering to smoothScalarBasedTurn(ship:altitude, startAlt, 50000,
-                                         ship:velocity:surface, ship:velocity:orbit,
-                                         ship:facing:topvector).
+  local lock turnStart to lookdirup(heading(launchAzimuth, srfPitch):vector, ship:facing:topvector):vector.
+  local lock turnEnd to lookdirup(heading(launchAzimuth, obtPitch):vector, ship:facing:topvector):vector.
+  lock steering to smoothScalarBasedTurn(ship:altitude, startAlt, orbitalTurnEndAltitude,
+                                         turnStart, turnEnd, ship:facing:topvector).
 
   // Limit acceleration (doesn't limit to exactly 5g, but it's close enough)
   lock throttle to max(0, min(1, mass * 5 * 9.82 / max(0.1, maxthrust))).
 }
 
-stage.
-wait 3.
+stage. // jettison interstage fairing and decouple booster
+wait 2.
 
 // We probably had no steering control for a while. Instead of abruptly snapping back to
 // the intended steering as soon as the engines turn on, unlock steering for a few
 // seconds.
 unlock steering.
 
-stage.
-wait 8.
-stage.
+stage. // second stage ignition
+wait 8. // wait for SAS and the engine to help stabilize us
+stage. // jettison payload fairing
 
 local lastEcc to ship:orbit:eccentricity.
 local lastLAN to ship:orbit:longitudeofascendingnode.
@@ -109,6 +124,9 @@ until lastEcc < ship:orbit:eccentricity {
   local dt to time:seconds - lastTime.
   local etaRate to (lastETA - eta:apoapsis) / dt.
   local tteta to eta:apoapsis / etaRate.
+  if eta:periapsis < eta:apoapsis {
+    set tteta to ttcirc.
+  }
 
   if time:seconds - lastPitchUpdateTime > pitchUpdatePeriod {
     // for every 1 minute we are short of tteta, raise the nose by 7
@@ -117,7 +135,7 @@ until lastEcc < ship:orbit:eccentricity {
     set pitchOffset to 7 * (ttcirc - tteta) / 60.
     set pitchOffset to min(pitchOffsetMax, max(-pitchOffsetMax, pitchOffset)).
 
-    if etaRate < 0 {
+    if etaRate < 0 and eta:apoapsis < eta:periapsis {
       set pitchOffset to -pitchOffsetMax.
     }
 
@@ -134,28 +152,28 @@ until lastEcc < ship:orbit:eccentricity {
   local lanROC to (curLAN - lastLAN) / dt.
   local hdngOffset to -lanPID:update(time:seconds, lanROC).
 
-  print "lastEcc: " + lastEcc.
-  print "ship:orbit:eccentricity: " + ship:orbit:eccentricity.
-  print "lastETA: " + lastETA.
-  print "eta:apoapsis: " + eta:apoapsis.
-  print "dt: " + dt.
-  print "etaRate: " + etaRate.
-  print "tteta: " + tteta.
-  print "ttcirc: " + ttcirc.
-  print "obtPitch: " + obtPitch.
-  print "pitchStart: " + pitchStart.
-  print "pitchEnd: " + pitchEnd.
-  print "pitchOffset: " + pitchOffset.
-  print "lastPitchUpdateTime: " + lastPitchUpdateTime.
-  print "smoothPitch: " + smoothPitch.
-  print "curLAN: " + curLAN.
-  print "lastLAN: " + lastLAN.
-  print "lanROC: " + lanROC.
-  print "hdngOffset: " + hdngOffset.
+  log "lastEcc: " + lastEcc to LOGFILE.
+  log "ship:orbit:eccentricity: " + ship:orbit:eccentricity to LOGFILE.
+  log "lastETA: " + lastETA to LOGFILE.
+  log "eta:apoapsis: " + eta:apoapsis to LOGFILE.
+  log "dt: " + dt to LOGFILE.
+  log "etaRate: " + etaRate to LOGFILE.
+  log "tteta: " + tteta to LOGFILE.
+  log "ttcirc: " + ttcirc to LOGFILE.
+  log "obtPitch: " + obtPitch to LOGFILE.
+  log "pitchStart: " + pitchStart to LOGFILE.
+  log "pitchEnd: " + pitchEnd to LOGFILE.
+  log "pitchOffset: " + pitchOffset to LOGFILE.
+  log "lastPitchUpdateTime: " + lastPitchUpdateTime to LOGFILE.
+  log "smoothPitch: " + smoothPitch to LOGFILE.
+  log "curLAN: " + curLAN to LOGFILE.
+  log "lastLAN: " + lastLAN to LOGFILE.
+  log "lanROC: " + lanROC to LOGFILE.
+  log "hdngOffset: " + hdngOffset to LOGFILE.
 
-  lock steering to lookdirup(heading(obtHdng + hdngOffset, smoothPitch):vector, ship:facing:topvector).
+  lock steering to lookdirup(heading(launchAzimuth, smoothPitch):vector, ship:facing:topvector).
 
-  print "-----------------------------------------------------------------------------".
+  log "-----------------------------------------------------------------------------" to LOGFILE.
 
   set lastEcc to ship:orbit:eccentricity.
   set lastLAN to curLAN.

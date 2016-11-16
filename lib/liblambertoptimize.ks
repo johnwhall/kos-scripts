@@ -1,7 +1,7 @@
 @lazyglobal off.
 
-run once liborbitalstate.
-run once libmainframe.
+runoncepath("lib/liborbitalstate").
+runoncepath("lib/libmainframe").
 
 function doOnce {
   parameter p_mu.

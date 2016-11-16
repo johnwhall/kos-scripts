@@ -1,7 +1,7 @@
 @lazyglobal off.
 
-run once libradtrig.
-run once libbrentsmethod.
+runoncepath("lib/libradtrig").
+runoncepath("lib/libbrentsmethod").
 
 local eps to 1e-10.
 

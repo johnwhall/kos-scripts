@@ -1,6 +1,6 @@
 @lazyglobal off.
 
-run once libwarpfor.
+runoncepath("lib/libwarpfor").
 
 function waitForLAN {
   parameter p_tgtLan.
