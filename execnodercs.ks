@@ -1,38 +1,27 @@
 @lazyglobal off.
 
-run once funs.
+parameter p_isp, p_thrust, p_turnTime.
 
-local throt to 0.
-lock throttle to throt.
-local prevSAS to sas.
-sas off.
-rcs on.
+runoncepath("lib/libburntime").
+runoncepath("lib/libgenericburn").
 
-local bt to burnTime1(nextnode:deltav:mag).
+local bt to burnTime(nextnode:deltav:mag, p_isp, p_thrust).
+local burnMidTime to time:seconds + nextnode:eta.
 
-warpFor1(nextnode:eta - bt - 90).
+function cb {
+  parameter predictDir, lastVal, lastTime.
+  local val to nextnode:deltav:mag.
+  local throt to 1.
 
-lock steering to nextnode:deltav:direction.
-wait until faceDiff() < 0.5.
+  if lastVal >= 0 {
+    local rate to (val - lastVal) / (time:seconds - lastTime).
+    local ttzero to val / (-rate).
+    set throt to max(0.1, min(1, ttzero)).
+    //print "ttzero: "  + ttzero.
+  }
 
-//warpFor1(nextnode:eta - (bt / 2) - 5).
-//wait until nextnode:eta < (bt / 2) - 5.
-
-set ship:control:fore to 1.
-//wait 5.
-//rcs off.
-
-//set throt to 1.
-local lastDV to nextnode:deltav:mag.
-wait 0.55.
-until lastDV < nextnode:deltav:mag {
-  set lastDV to nextnode:deltav:mag.
-  wait 0.05.
+  return lexicon("dir", nextnode:deltav, "throt", throt, "val", nextnode:deltav:mag).
 }
 
-//wait until nextnode:deltav:mag < 0.1.
-
-set throt to 0.
-set sas to prevSAS.
-
+genericBurnRCS(burnMidTime, bt, p_turnTime, cb@).
 remove nextnode.

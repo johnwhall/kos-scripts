@@ -56,7 +56,8 @@ public class OrbitAtTime extends Orbit {
 		if (_ea == null) {
 			calcTrueAnomaly();
 			_ea = Math.acos((_e + Math.cos(_ta)) / (1 + _e * Math.cos(_ta)));
-			if (Math.PI < _ta && _ta < MathUtils.TWO_PI) _ea = MathUtils.TWO_PI - _ea;
+			if (Math.PI < _ta && _ta < MathUtils.TWO_PI)
+				_ea = MathUtils.TWO_PI - _ea;
 		}
 	}
 
@@ -78,7 +79,8 @@ public class OrbitAtTime extends Orbit {
 	}
 
 	private void calcECIVectors() {
-		if (_ta == null) throw new RuntimeException("can't calc eci vecs without true anomaly");
+		if (_ta == null)
+			throw new RuntimeException("can't calc eci vecs without true anomaly");
 		if (_rVec == null || _vVec == null) {
 			double p = _a * (1 - _e * _e);
 			double r = p / (1 + _e * Math.cos(_ta));
@@ -149,9 +151,12 @@ public class OrbitAtTime extends Orbit {
 
 		double newMA = (ma + n * dt) % MathUtils.TWO_PI;
 		double newEA = eccentricAnomalyFromMeanAnomaly(_e, newMA);
-		double newTA = 2 * Math.atan2(Math.sqrt(1 + _e) * Math.sin(newEA / 2),
-		                              Math.sqrt(1 - _e) * Math.cos(newEA / 2));
+		double newTA = 2 * Math.atan2(Math.sqrt(1 + _e) * Math.sin(newEA / 2), Math.sqrt(1 - _e) * Math.cos(newEA / 2));
 		return new OrbitAtTime(_body, _a, _e, _i, _lan, _aop, newTA);
+	}
+
+	public double phaseAngleWith(OrbitAtTime oat) {
+		return Vector3D.angle(_rVec, oat.getRadiusVector());
 	}
 
 	private static double eccentricAnomalyFromMeanAnomaly(double e, double ma) {
@@ -163,7 +168,8 @@ public class OrbitAtTime extends Orbit {
 		DoubleFunction<Double> fp = (double x) -> 1 - e * Math.cos(x);
 		NewtonsMethod mth = new NewtonsMethod(f, fp, ma, 100, 1e-9);
 		mth.execute();
-		if (!mth.getConverged()) throw new RuntimeException("failed to converge");
+		if (!mth.getConverged())
+			throw new RuntimeException("failed to converge");
 		return mth.getResult();
 	}
 
@@ -187,29 +193,34 @@ public class OrbitAtTime extends Orbit {
 		double lan = 0;
 		if (n.getNorm() != 0) {
 			lan = Math.acos(n.getX() / n.getNorm());
-			if (n.getY() < 0) lan = MathUtils.TWO_PI - lan;
+			if (n.getY() < 0)
+				lan = MathUtils.TWO_PI - lan;
 		}
 
 		// Argument of Periapsis
 		double aop = 0;
 		if (n.getNorm() != 0) {
 			aop = Math.acos(n.dotProduct(eVec) / (n.getNorm() * e));
-			if (eVec.getZ() < 0) aop = MathUtils.TWO_PI - aop;
+			if (eVec.getZ() < 0)
+				aop = MathUtils.TWO_PI - aop;
 		}
 
 		// True Anomaly
 		double ta = 0;
 		if (Math.abs(e) > 1e-6) {
 			ta = Math.acos(eVec.dotProduct(rVec) / (r * e));
-			if (rVec.dotProduct(vVec) < 0) ta = MathUtils.TWO_PI - ta;
+			if (rVec.dotProduct(vVec) < 0)
+				ta = MathUtils.TWO_PI - ta;
 		} else if (Math.abs(i) > 1e-6) {
 			// Circular orbit
 			ta = Math.acos(n.dotProduct(rVec) / (r * n.getNorm()));
-			if (n.dotProduct(vVec) > 0) ta = MathUtils.TWO_PI - ta;
+			if (n.dotProduct(vVec) > 0)
+				ta = MathUtils.TWO_PI - ta;
 		} else {
 			// Circular orbit with zero inclination
 			ta = Math.acos(rVec.getX() / r);
-			if (vVec.getX() > 0) ta = MathUtils.TWO_PI - ta;
+			if (vVec.getX() > 0)
+				ta = MathUtils.TWO_PI - ta;
 		}
 
 		OrbitAtTime oat = new OrbitAtTime(b, a, e, i, lan, aop, ta);

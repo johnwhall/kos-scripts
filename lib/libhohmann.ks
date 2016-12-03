@@ -25,5 +25,4 @@ function nodeForHohmannTransfer {
   return node(time:seconds + ttpa, 0, 0, xferBurnDV).
 }
 
-//add nodeForHohmannTransfer(vessel("MEO Comsat Target")).
-//add nodeForHohmannTransfer(moon).
+add nodeForHohmannTransfer(vessel("JSS")).

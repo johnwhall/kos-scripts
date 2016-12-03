@@ -1,35 +1,73 @@
 @lazyglobal off.
 
 function warpFor1 {
-  parameter dt.
-  local endTime to time:seconds + dt.
-  set kuniverse:timewarp:mode to "RAILS".
-  kuniverse:timewarp:warpto(endTime).
-  wait until time:seconds >= endTime.
+  parameter p_dt.
+
+  local endTime to time:seconds + p_dt.
+  warpUntilZero({ return endTime - time:seconds. }).
 }
 
-function oldWarpFor1 {
-  parameter dt.
+function warpFor {
+  parameter p_dt.
+  warpFor1(p_dt).
+}
 
-  print "warping for " + dt.
+function warpUntilZero {
+  parameter callback.
+
+  local curVal to callback().
+  if (curVal < 0) {
+    print "Skipping warp. Current value: " + curVal.
+    return.
+  }
+
+  print "Warping. Current value: " + curVal.
 
   local warpSpeeds to kuniverse:timewarp:railsratelist.
-  local endTime to time:seconds + dt.
-  local i to warpSpeeds:length - 1.
+  local i to 0.
+  local lastTime to time:seconds.
+  local lastVal to callback().
 
-  until time:seconds > endTime or i < 1 {
-    if (warpSpeeds[i] > (endTime - time:seconds) * 4) {
-      set i to i - 1.
+  wait 1.
+
+  local curVal to lastVal.
+  local curTime to time:seconds.
+  lock dt to curTime - lastTime.
+
+  function getRate {
+    parameter curVal, lastVal, dt.
+    if curVal = lastVal {
+      return -999999999.
     } else {
-      if warp <> i {
-        print "setting warp to " + i + " (" + warpSpeeds[i] + ")".
-      }
-      set warp to i.
-      set warpmode to "RAILS".
-      wait 0.5.
+      return (curVal - lastVal) / dt.
     }
   }
 
-  set warp to 0.
-  wait until time:seconds > endTime.
+  lock rate to getRate(curVal, lastVal, dt).
+  lock timeToZero to -curVal / rate.
+
+  until curVal <= 0 {
+    if timeToZero < warpSpeeds[i] * 1.5 {
+      // if it takes less than 1.5 seconds to reach zero, slow down
+      set i to max(0, i - 1).
+    } else if i < warpSpeeds:length - 1 and timeToZero / 1.5 > warpSpeeds[i+1] {
+      // if the next highest speed takes more than 1.5 seconds to reach zero, speed up
+      set i to min(warpSpeeds:length, i + 1).
+    }
+
+    if warp <> i {
+      set warp to i.
+      set warpmode to "RAILS".
+    }
+
+    wait min(timeToZero, 0.5).
+
+    set lastVal to curVal.
+    set curVal to callback().
+    set lastTime to curTime.
+    set curTime to time:seconds.
+  }
+
+  print "ending warp".
+  set warp to 0. // just in case
 }

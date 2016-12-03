@@ -5,19 +5,19 @@ import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Iterator;
 
 public class Main {
-	public static String KSP_SCRIPT_DIR = "/home/jhall/.steam/steam/SteamApps/common/KSP_1.0.5/Ships/Script";
-	public static String KSP_REQUEST_FILE = KSP_SCRIPT_DIR + "/libmainframe_request.txt";
+	public static String KSP_SCRIPT_DIR = "C:\\Games\\Steam\\steamapps\\common\\Kerbal Space Program 1.1.3\\Ships\\Script";
+	public static String KSP_REQUEST_FILE = KSP_SCRIPT_DIR + "\\libmainframe_request.txt";
 	public static Path KSP_REQUEST_PATH = Paths.get(KSP_REQUEST_FILE);
-	public static String KSP_REQUEST_DONE_FILE = KSP_SCRIPT_DIR + "/libmainframe_request_done.txt";
+	public static String KSP_REQUEST_DONE_FILE = KSP_SCRIPT_DIR + "\\libmainframe_request_done.txt";
 	public static Path KSP_REQUEST_DONE_PATH = Paths.get(KSP_REQUEST_DONE_FILE);
-	public static String KSP_RESULT_FILE = KSP_SCRIPT_DIR + "/libmainframe_result.json";
+	public static String KSP_RESULT_FILE = KSP_SCRIPT_DIR + "\\libmainframe_result.json";
 	public static Path KSP_RESULT_PATH = Paths.get(KSP_RESULT_FILE);
-	public static String KSP_RESULT_DONE_FILE = KSP_SCRIPT_DIR + "/libmainframe_result_done.txt";
+	public static String KSP_RESULT_DONE_FILE = KSP_SCRIPT_DIR + "\\libmainframe_result_done.txt";
 	public static Path KSP_RESULT_DONE_PATH = Paths.get(KSP_RESULT_DONE_FILE);
 
 	public static void main(String[] args) throws Exception {
@@ -36,24 +36,24 @@ public class Main {
 
 			Map<String, Object> result = null;
 			switch (requestType) {
-				case "square":
-					result = Square.Square(requestArgs);
-					break;
-				case "lambertoptimize":
-					result = LambertOptimizer.mainframe(requestArgs);
-					break;
-				default:
-					throw new IllegalArgumentException("unknown request type: " + requestType);
+			case "square":
+				result = Square.Square(requestArgs);
+				break;
+			case "lambertoptimize":
+				result = LambertOptimizer.mainframe(requestArgs);
+				break;
+			default:
+				throw new IllegalArgumentException("unknown request type: " + requestType);
 			}
 
 			try (PrintWriter pw = new PrintWriter(KSP_RESULT_FILE)) {
 				writeMap(result, pw, "");
 			}
 
-			try (FileOutputStream fos = new FileOutputStream(KSP_RESULT_DONE_FILE)) { }
+			try (FileOutputStream fos = new FileOutputStream(KSP_RESULT_DONE_FILE)) {
+			}
 
 			Thread.sleep(1000); // wait for kOS to delete the request done file
-
 		}
 	}
 

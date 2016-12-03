@@ -1,8 +1,10 @@
 package hall.john.ksp.mainframe;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 
@@ -22,16 +24,20 @@ public class LambertOptimizer {
 	private double _dtMax;
 	private double _dtStep;
 	private boolean _allowLob;
+	private boolean _optArrival;
 
 	// Calculated
 	private Vector3D _dv1;
 	private Vector3D _dv2;
 	private Double _t;
 	private Double _dt;
+	private double _bestDV = Double.MAX_VALUE;
+	private long _count;
+	private long _lastPct;
+	private long _numCalcs;
 
-	public LambertOptimizer(double mu, OrbitAtTime oat0, OrbitAtTime tgtOat0,
-			double tMin, double tMax, double tStep,
-			double dtMin, double dtMax, double dtStep, boolean allowLob) {
+	public LambertOptimizer(double mu, OrbitAtTime oat0, OrbitAtTime tgtOat0, double tMin, double tMax, double tStep,
+			double dtMin, double dtMax, double dtStep, boolean allowLob, boolean optArrival) {
 		_mu = mu;
 		_tgtOat0 = tgtOat0;
 		_oat0 = oat0;
@@ -42,17 +48,21 @@ public class LambertOptimizer {
 		_dtMax = dtMax;
 		_dtStep = dtStep;
 		_allowLob = allowLob;
+		_optArrival = optArrival;
+		long numTCalcs = (long) ((_tMax - _tMin) / (_tStep));
+		long numDTCalcs = (long) ((_dtMax - _dtMin) / (_dtStep));
+		_numCalcs = numTCalcs * numDTCalcs;
 	}
 
 	public void execute() {
-		double bestDV = Double.MAX_VALUE;
+		ExecutorService executor = Executors.newFixedThreadPool(1);
 
 		for (double t = _tMin; t <= _tMax; t += _tStep) {
-			for (double dt = _dtMin; dt <= _dtMax; dt += _dtStep) {
-				OrbitAtTime oatAtBurn1 = _oat0.afterTime(t);
-				OrbitAtTime tgtOatAtIntercept = _tgtOat0.afterTime(t + dt);
+			OrbitAtTime oatAtBurn1 = _oat0.afterTime(t);
+			Vector3D r1 = oatAtBurn1.getRadiusVector();
 
-				Vector3D r1 = oatAtBurn1.getRadiusVector();
+			for (double dt = _dtMin; dt <= _dtMax; dt += _dtStep) {
+				OrbitAtTime tgtOatAtIntercept = _tgtOat0.afterTime(t + dt);
 				Vector3D r2 = tgtOatAtIntercept.getRadiusVector();
 
 				LambertSolver ls = new LambertSolver(_mu, r1, r2, dt, 0, true);
@@ -65,24 +75,40 @@ public class LambertOptimizer {
 
 					Vector3D dv1 = v1.subtract(oatAtBurn1.getVelocityVector());
 					Vector3D dv2 = tgtOatAtIntercept.getVelocityVector().subtract(v2);
-					double dv = dv1.getNorm(); // + dv2.getNorm();
+					double dv = dv1.getNorm();
+					if (_optArrival) {
+						dv += dv2.getNorm();
+					}
 
 					if (!_allowLob) {
 						double a = 1 / ((2 / r1.getNorm()) - (v1.getNormSq() / _mu));
-						Vector3D eVec = (v1.crossProduct(r1.crossProduct(v1))).scalarMultiply(1 / _mu).subtract(r1.normalize());
+						Vector3D eVec = (v1.crossProduct(r1.crossProduct(v1))).scalarMultiply(1 / _mu)
+								.subtract(r1.normalize());
 						double e = eVec.getNorm();
 						double apoapsis = a * (1 + e);
-						if (apoapsis > r2.getNorm()) continue;
+						if (apoapsis > r2.getNorm())
+							return;
 					}
 
-					if (dv < bestDV) {
+					if (dv < _bestDV) {
 						_dv1 = dv1;
 						_dv2 = dv2;
 						_t = t;
 						_dt = dt;
-						bestDV = dv;
+						_bestDV = dv;
 					}
 				}
+
+				executor.submit(() -> {
+					synchronized (LambertOptimizer.this) {
+						_count++;
+						long pct = 100 * _count / _numCalcs;
+						if (pct >= _lastPct + 10) {
+							System.out.println(String.format("%10d / %d: %3d%%", _count, _numCalcs, pct));
+							_lastPct += 10;
+						}
+					}
+				});
 			}
 		}
 	}
@@ -138,36 +164,54 @@ public class LambertOptimizer {
 		double dtStep = Double.parseDouble(requestArgs.get(18));
 
 		boolean allowLob = Boolean.parseBoolean(requestArgs.get(19));
+		boolean optArrival = Boolean.parseBoolean(requestArgs.get(20));
 
 		System.out.println("mu = " + mu);
 		System.out.println("r1 = " + r1);
 		System.out.println("v1 = " + v1);
 		System.out.println("r2 = " + r2);
 		System.out.println("v2 = " + v2);
-		System.out.println("tMin = " + tMin);
-		System.out.println("tMax = " + tMax);
-		System.out.println("tStep = " + tStep);
-		System.out.println("dtMin = " + dtMin);
-		System.out.println("dtMax = " + dtMax);
-		System.out.println("dtStep = " + dtStep);
+		System.out.println("t: (min: " + tMin + " step: " + tStep + " max: " + tMax + ")");
+		System.out.println("dt: (min: " + dtMin + " step: " + dtStep + " max: " + dtMax + ")");
 		System.out.println("allowLob = " + allowLob);
+		System.out.println("optArrival = " + optArrival);
 
-		LambertOptimizer lo = new LambertOptimizer(mu, oat0, tgtOat0, tMin, tMax, tStep, dtMin, dtMax, dtStep, allowLob);
+		double initialPhaseAngle = Math.toDegrees(oat0.phaseAngleWith(tgtOat0));
+		System.out.println("Initial Phase Angle: " + initialPhaseAngle + " degrees");
+
+		LambertOptimizer lo = new LambertOptimizer(mu, oat0, tgtOat0, tMin, tMax, tStep, dtMin, dtMax, dtStep, allowLob,
+				optArrival);
 		lo.execute();
 
 		Vector3D dv1 = lo.getDV1();
 		Vector3D dv2 = lo.getDV2();
-		double dv = dv1.getNorm(); // + dv2.getNorm();
 		double t = lo.getT();
 		double dt = lo.getDT();
 
-		System.out.println("dv1 = " + dv1);
-		System.out.println("dv2 = " + dv2);
-		System.out.println("dv = " + dv);
+		System.out.println("dv1 = " + dv1 + " (norm: " + dv1.getNorm() + ")");
+		System.out.println("dv2 = " + dv2 + " (norm: " + dv2.getNorm() + ")");
 		System.out.println("t = " + t);
 		System.out.println("dt = " + dt);
 
-		ManeuverNode node = new ManeuverNode(oat0.afterTime(t), dv1);
+		OrbitAtTime orbitAtBurn = oat0.afterTime(t);
+		OrbitAtTime targetAtBurn = tgtOat0.afterTime(t);
+		System.out.println("radiusAtBurn = " + orbitAtBurn.getRadiusVector());
+		System.out.println("targetRadiusAtBurn = " + targetAtBurn.getRadiusVector());
+
+		ManeuverNode node = new ManeuverNode(orbitAtBurn, dv1);
+		OrbitAtTime newOAT = node.getResultingOAT();
+		OrbitAtTime orbitAtIntercept = newOAT.afterTime(dt);
+		OrbitAtTime targetAtIntercept = tgtOat0.afterTime(t + dt);
+		Vector3D radiusAtIntercept = orbitAtIntercept.getRadiusVector();
+		Vector3D targetRadiusAtIntercept = targetAtIntercept.getRadiusVector();
+
+		System.out.println("radiusAtIntercept = " + radiusAtIntercept);
+		System.out.println("targetRadiusAtIntercept = " + targetRadiusAtIntercept);
+		double dist = targetRadiusAtIntercept.subtract(radiusAtIntercept).getNorm();
+		System.out.println("distance = " + dist);
+		System.out.println("prograde = " + node.getPrograde());
+		System.out.println("normal = " + node.getNormal());
+		System.out.println("radial = " + node.getRadial());
 
 		Map<String, Object> result = new HashMap<String, Object>();
 		result.put("t", t);

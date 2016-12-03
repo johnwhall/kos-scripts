@@ -27,7 +27,14 @@ local betaInertial to arcsin(max(-1, min(1, cos(targetInclination) / cos(ship:la
 local vEqRot to 2 * constant:pi * body:radius / body:rotationperiod.
 local vOrbit to sqrt(body:mu / (body:radius + targetAltitude)).
 local launchAzimuth to arctan((vOrbit * sin(betaInertial) -  vEqRot * cos(ship:latitude)) / (vOrbit * cos(betaInertial))).
-print "launch azimuth: " + launchAzimuth.
+
+log "Launching at " + time:seconds to LOGFILE.
+log "Inputs:" to LOGFILE.
+log "  Initial Turn Angle: " + initialTurnAngle to LOGFILE.
+log "  Initial Turn Start Speed: " + initialTurnStartSpeed to LOGFILE.
+log "  Orbital Turn End Altitude: " + orbitalTurnEndAltitude to LOGFILE.
+log "  Target Inclination: " + targetInclination to LOGFILE.
+log "  Target Altitude: " + targetAltitude to LOGFILE.
 log "launch azimuth: " + launchAzimuth to LOGFILE.
 
 local obtProProjOntoHorizon to 0.

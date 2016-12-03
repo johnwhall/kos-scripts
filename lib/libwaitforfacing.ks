@@ -1,9 +1,15 @@
 @lazyglobal off.
 
-runoncepath("/lib/libfacediff").
+runoncepath("lib/libfacediff").
 
 function waitForFacing {
   parameter tgtDiff, includeRoll is true, stabilizeAtEnd is true.
+
+  if kuniverse:timewarp:mode = "RAILS" {
+    // Just in case something accidentally left us in rails warp,
+    // set it to zero so we can turn
+    set kuniverse:timewarp:warp to 0.
+  }
 
   local minDiff to faceDiff(includeRoll).
 

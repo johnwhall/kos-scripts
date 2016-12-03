@@ -1,10 +1,10 @@
 @lazyglobal off.
 
 function mainframeClean {
-  run deleteifexists("libmainframe_request.txt").
-  run deleteifexists("libmainframe_request_done.txt").
-  run deleteifexists("libmainframe_result.json").
-  run deleteifexists("libmainframe_result_done.txt").
+  deletepath("libmainframe_request.txt").
+  deletepath("libmainframe_request_done.txt").
+  deletepath("libmainframe_result.json").
+  deletepath("libmainframe_result_done.txt").
 }
 
 function mainframeDo {
@@ -12,8 +12,9 @@ function mainframeDo {
 
   // wait for response
   wait until archive:files:haskey("libmainframe_result_done.txt").
+  deletepath("libmainframe_request_done.txt").
   wait 0.25. // wait for the mainframe to close the file before we delete it
-  delete "libmainframe_result_done.txt".
+  deletepath("libmainframe_result_done.txt").
 
   local resultLex to readjson("libmainframe_result.json").
   mainframeClean().
@@ -43,6 +44,7 @@ function mainframeLambertOptimizeVecs {
   parameter p_dtMax.
   parameter p_dtStep.
   parameter p_allowLob.
+  parameter p_optArrival.
 
   mainframeClean().
 
@@ -72,6 +74,7 @@ function mainframeLambertOptimizeVecs {
   log p_dtStep to libmainframe_request.txt.
 
   log p_allowLob to libmainframe_request.txt.
+  log p_optArrival to libmainframe_request.txt.
 
   return mainframeDo().
 }

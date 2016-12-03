@@ -26,6 +26,13 @@ public class ManeuverNode {
 		return _oat;
 	}
 
+	public OrbitAtTime getResultingOAT() {
+		Vector3D r = _oat.getRadiusVector();
+		Vector3D v0 = _oat.getVelocityVector();
+		Vector3D v1 = v0.add(getDVVec());
+		return new OrbitAtTime(_oat.getBody(), r, v1);
+	}
+
 	private Vector3D proDir() {
 		return _oat.getVelocityVector().normalize();
 	}
@@ -40,7 +47,8 @@ public class ManeuverNode {
 
 	private void calcDVVec() {
 		if (_dvVec == null) {
-			if (_prograde == null || _normal == null || _radial == null) throw new RuntimeException("need pnr to calc dvVec");
+			if (_prograde == null || _normal == null || _radial == null)
+				throw new RuntimeException("need pnr to calc dvVec");
 			Vector3D pro = proDir().scalarMultiply(_prograde);
 			Vector3D norm = normDir().scalarMultiply(_normal);
 			Vector3D rad = radialDir().scalarMultiply(_radial);
@@ -63,7 +71,8 @@ public class ManeuverNode {
 
 	public double getPrograde() {
 		if (_prograde == null) {
-			if (_dvVec == null) throw new RuntimeException("need dvVec to calc prograde");
+			if (_dvVec == null)
+				throw new RuntimeException("need dvVec to calc prograde");
 			_prograde = projectionOnto(_dvVec, proDir());
 		}
 
@@ -72,7 +81,8 @@ public class ManeuverNode {
 
 	public double getNormal() {
 		if (_normal == null) {
-			if (_dvVec == null) throw new RuntimeException("need dvVec to calc normal");
+			if (_dvVec == null)
+				throw new RuntimeException("need dvVec to calc normal");
 			_normal = projectionOnto(_dvVec, normDir());
 		}
 
@@ -81,7 +91,8 @@ public class ManeuverNode {
 
 	public double getRadial() {
 		if (_radial == null) {
-			if (_dvVec == null) throw new RuntimeException("need dvVec to calc radial");
+			if (_dvVec == null)
+				throw new RuntimeException("need dvVec to calc radial");
 			_radial = projectionOnto(_dvVec, radialDir());
 		}
 

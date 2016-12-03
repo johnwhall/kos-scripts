@@ -10,8 +10,10 @@ function phaseAngle {
   local bcShipPos to positionat(ship, p_atTime) - body:position.
   local bcTgtPos to positionat(p_tgt, p_atTime) - body:position.
 
-  local bcShipPosProj to vxcl(north:vector, bcShipPos).
-  local bcTgtPosProj to vxcl(north:vector, bcTgtPos).
+//  local bcShipPosProj to vxcl(north:vector, bcShipPos).
+//  local bcTgtPosProj to vxcl(north:vector, bcTgtPos).
+  local bcShipPosProj to bcShipPos.
+  local bcTgtPosProj to bcTgtPos.
 
   local ang to vang(bcShipPosProj, bcTgtPosProj).
   if vdot(vcrs(bcShipPosProj, bcTgtPosProj), north:vector) > 0 {
@@ -46,16 +48,17 @@ function timeToPhaseAngle {
   local synodicPeriod to 1 / ((1 / ship:orbit:period) - (1 / p_tgt:orbit:period)).
   local guess1 to deltaAngle / (360 / synodicPeriod).
   local guess2 to guess1 + 100.
-  local result to secantMethod(cb@, guess1, guess2, 10, 1e-2).
+  local result to secantMethod(cb@, guess1, guess2, 100, 1e-4).
 
   return result.
 }
 
-//local tgtAngle to 270.
-//local tt to timeToPhaseAngle(tgtAngle, moon).
-////add node(time:seconds + tt, 0, 0, 0).
-//
-//print "Current Phase Angle: " + phaseAngle(time:seconds, moon).
+//local tgtAngle to 3.97.
+//local tt to timeToPhaseAngle(tgtAngle, vessel("JSS")).
+//add node(time:seconds + tt, 0, 0, 58.27).
+
+//print "Current Phase Angle: " + phaseAngle(time:seconds, vessel("JSS")).
 //print "Target Phase Angle: " + tgtAngle.
+//print "Target time: " + (time:seconds + tt).
 //print "Time to Target: " + tt.
-//print "Calculated Phase Angle: " + phaseAngle(time:seconds + tt, moon).
+//print "Calculated Phase Angle: " + phaseAngle(time:seconds + tt, vessel("JSS")).

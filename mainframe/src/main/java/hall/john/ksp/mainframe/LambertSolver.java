@@ -10,8 +10,10 @@ import hall.john.ksp.mainframe.numericalmethods.BrentsMethod;
 
 public class LambertSolver {
 	// Converted from https://alexmoon.github.io/ksp/javascripts/lambert.js
-	// Originally Based on Sun, F.T. "On the Minium Time Trajectory and Multiple Solutions of Lambert's Problem"
-	// AAS/AIAA Astrodynamics Conference, Provincetown, Massachusetts, AAS 79-164, June 25-27, 1979
+	// Originally Based on Sun, F.T. "On the Minium Time Trajectory and Multiple
+	// Solutions of Lambert's Problem"
+	// AAS/AIAA Astrodynamics Conference, Provincetown, Massachusetts, AAS
+	// 79-164, June 25-27, 1979
 
 	public static double EPS = 1e-10;
 
@@ -19,6 +21,17 @@ public class LambertSolver {
 		public Vector3D v1;
 		public Vector3D v2;
 		public double angle;
+
+		@Override
+		public String toString() {
+			StringBuilder strb = new StringBuilder();
+			strb.append(v1);
+			strb.append(" ");
+			strb.append(v2);
+			strb.append(" ");
+			strb.append(angle);
+			return strb.toString();
+		}
 	}
 
 	// Provided
@@ -119,14 +132,17 @@ public class LambertSolver {
 	}
 
 	private double phix(double x) {
-		if (x == 0) x = EPS;
-		if (x == 1) x = 1 - EPS;
+		if (x == 0)
+			x = EPS;
+		if (x == 1)
+			x = 1 - EPS;
 		double g = Math.sqrt(1 - x * x);
 		return acot(x / g) - (2 + x * x) * g / (3 * x);
 	}
 
 	private double phiy(double y) {
-		if (y == 0) y = EPS;
+		if (y == 0)
+			y = EPS;
 		double h = Math.sqrt(1 - y * y);
 		return Math.atan(h / y) - (2 + y * y) * h / (3 * y);
 	}
@@ -199,12 +215,14 @@ public class LambertSolver {
 
 			BrentsMethod mth = new BrentsMethod(this::ftau, x1, x2, 100, 1e-4);
 			mth.execute();
-			if (!mth.getConverged()) throw new RuntimeException("failure");
+			if (!mth.getConverged())
+				throw new RuntimeException("failure");
 			double x = mth.getResult();
 			pushSolution(x, fy(x), _N);
 		} else {
 			int maxRevs = (int) Math.min(_maxRevs, Math.floor(_normalizedTime / Math.PI));
-			double minimumEnergyNormalizedTime = Math.acos(_angleParameter) + _angleParameter * Math.sqrt(1 - _angleParameter2);
+			double minimumEnergyNormalizedTime = Math.acos(_angleParameter)
+					+ _angleParameter * Math.sqrt(1 - _angleParameter2);
 
 			int i = 0;
 			while (Math.abs(i) <= Math.abs(maxRevs)) {
@@ -218,13 +236,15 @@ public class LambertSolver {
 					} else if (_angleParameter == 0) {
 						BrentsMethod mth = new BrentsMethod(x -> phix(x) + _N * Math.PI, 0, 1, 100, 1e-4);
 						mth.execute();
-						if (!mth.getConverged()) throw new RuntimeException("failure");
+						if (!mth.getConverged())
+							throw new RuntimeException("failure");
 						xMT = mth.getResult();
 						minimumNormalizedTime = 2 / (3 * xMT);
 					} else {
 						BrentsMethod mth = new BrentsMethod(x -> phix(x) - phiy(fy(x)) + _N * Math.PI, 0, 1, 100, 1e-4);
 						mth.execute();
-						if (!mth.getConverged()) throw new RuntimeException("failure");
+						if (!mth.getConverged())
+							throw new RuntimeException("failure");
 						xMT = mth.getResult();
 						minimumNormalizedTime = (2 / 3.0) * (1 / xMT - _angleParameter3 / Math.abs(fy(xMT)));
 					}
@@ -234,7 +254,7 @@ public class LambertSolver {
 						break;
 					} else if (_normalizedTime < minimumNormalizedTime) {
 						break;
-					} else  if (_normalizedTime < minimumEnergyNormalizedTime) {
+					} else if (_normalizedTime < minimumEnergyNormalizedTime) {
 						pushIfConverges(new BrentsMethod(this::ftau, 0, xMT, 100, 1e-4), _N);
 						pushIfConverges(new BrentsMethod(this::ftau, xMT, 1 - EPS, 100, 1e-4), _N);
 						break;

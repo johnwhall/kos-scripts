@@ -2,10 +2,12 @@
 
 parameter where.
 parameter tgtApo. // not including body radius
-parameter settleFuel.
+parameter turnTime.
+parameter ullageTime.
 
-runoncepath("/lib/libburntime").
-runoncepath("/lib/libtimeto").
+runoncepath("lib/libburntime").
+runoncepath("lib/libtimeto").
+runoncepath("lib/libgenericburn").
 
 local targetTime to time:seconds + timeTo1(where, list("per", "anode", "dnode")).
 
@@ -28,31 +30,27 @@ print "burnStartTime = " + burnStartTime.
 print "burnMidTime = " + burnMidTime.
 print "burnEndTime = " + burnEndTime.
 
-local throt to 0.
-lock throttle to throt.
-local prevSAS to sas.
-sas off.
-
-local lock pointVec to retrograde:vector.
-if (tgtApo > ship:obt:apoapsis) {
-  lock pointVec to prograde:vector.
+function pointVecCallback {
+  parameter initial.
+  if tgtApo > ship:obt:apoapsis {
+    if initial {
+      //return velocityat(ship, time:seconds + halfDVTime):orbit. // huh? missing time between now and burn start
+      return velocityat(ship, targetTime - halfDVTime):orbit.
+    } else {
+      return prograde:vector.
+    }
+  } else {
+    if initial {
+      //return -velocityat(ship, time:seconds + halfDVTime):orbit. // huh? missing time between now and burn start
+      return -velocityat(ship, targetTime - halfDVTime):orbit.
+    } else {
+      return retrograde:vector.
+    }
+  }
 }
 
-runpath("prepareForBurn", pointVec, burnMidTime, bt, settleFuel).
-lock steering to lookdirup(pointVec, ship:facing:topvector).
-
-local cDiff to 0.
-lock cDiff to abs(ship:obt:apoapsis - tgtApo).
-local lastDiff to cDiff.
-set throt to 1.
-wait 0.1.
-until lastDiff < cDiff {
-  set lastDiff to cDiff.
-  wait 0.05.
+function valueCallback {
+  return abs(ship:obt:apoapsis - tgtApo).
 }
 
-set throt to 0.
-set sas to prevSAS.
-unlock steering.
-
-wait 0.05. // wait for throttle change to take effect
+genericBurn(burnMidTime, bt, turnTime, ullageTime, valueCallback@, pointVecCallback@).
