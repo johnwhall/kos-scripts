@@ -30,27 +30,22 @@ print "burnStartTime = " + burnStartTime.
 print "burnMidTime = " + burnMidTime.
 print "burnEndTime = " + burnEndTime.
 
-function pointVecCallback {
-  parameter initial.
-  if tgtApo > ship:obt:apoapsis {
-    if initial {
-      //return velocityat(ship, time:seconds + halfDVTime):orbit. // huh? missing time between now and burn start
-      return velocityat(ship, targetTime - halfDVTime):orbit.
-    } else {
-      return prograde:vector.
-    }
-  } else {
-    if initial {
-      //return -velocityat(ship, time:seconds + halfDVTime):orbit. // huh? missing time between now and burn start
-      return -velocityat(ship, targetTime - halfDVTime):orbit.
-    } else {
-      return retrograde:vector.
-    }
+function changeapoapsis_cb {
+  parameter predictDir, lastVal, lastTime.
+  local val to abs(ship:obt:apoapsis - tgtApo).
+
+  local throt to 1.
+  if lastVal >= 0 {
+    local rate to (val - lastVal) / (time:seconds - lastTime).
+    local ttzero to val / (-rate).
+    set throt to max(0.1, min(1, ttzero)).
   }
+
+  local dir to prograde:vector.
+  if predictDir { set dir to velocityat(ship, targetTime - halfDVTime):orbit. }
+  if tgtApo < ship:obt:apoapsis { set dir to R(180, 0, 0) * dir. }
+
+  return lexicon("dir", dir, "throt", throt, "val", val).
 }
 
-function valueCallback {
-  return abs(ship:obt:apoapsis - tgtApo).
-}
-
-genericBurn(burnMidTime, bt, turnTime, ullageTime, valueCallback@, pointVecCallback@).
+genericBurn(burnMidTime, bt, turnTime, ullageTime, changeapoapsis_cb@).

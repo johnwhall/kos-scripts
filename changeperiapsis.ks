@@ -42,8 +42,7 @@ wait until faceDiff() < 0.5.
 warpFor1(timeToBurnMid - (bt / 2) - 5).
 wait until timeToBurnMid < (bt / 2).
 
-local curDiff to 0.
-lock curDiff to abs(ship:obt:periapsis - tgtPer).
+local lock curDiff to abs(ship:obt:periapsis - tgtPer).
 local lastDiff to curDiff.
 set throt to 1.
 wait 0.1.

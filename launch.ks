@@ -4,6 +4,7 @@
 
 parameter initialTurnAngle, initialTurnStartSpeed, orbitalTurnEndAltitude, targetInclination, targetAltitude.
 
+{
 runoncepath("lib/libengine").
 runoncepath("lib/libsmoothturn").
 runoncepath("lib/libburntime").
@@ -37,23 +38,12 @@ log "  Target Inclination: " + targetInclination to LOGFILE.
 log "  Target Altitude: " + targetAltitude to LOGFILE.
 log "launch azimuth: " + launchAzimuth to LOGFILE.
 
-local obtProProjOntoHorizon to 0.
-lock obtProProjOntoHorizon to ship:velocity:orbit - vdot(ship:velocity:orbit, up:vector) * up:vector.
-
-local srfProProjOntoHorizon to 0.
-lock srfProProjOntoHorizon to ship:velocity:surface - vdot(ship:velocity:surface, up:vector) * up:vector.
-
-local obtHdng to 0.
-lock obtHdng to vang(obtProProjOntoHorizon, north:vector).
-
-local srfHdng to 0.
-lock srfHdng to vang(srfProProjOntoHorizon, north:vector).
-
-local obtPitch to 0.
-lock obtPitch to 90 - vang(ship:velocity:orbit, up:vector).
-
-local srfPitch to 0.
-lock srfPitch to 90 - vang(ship:velocity:surface, up:vector).
+local lock obtProProjOntoHorizon to ship:velocity:orbit - vdot(ship:velocity:orbit, up:vector) * up:vector.
+local lock srfProProjOntoHorizon to ship:velocity:surface - vdot(ship:velocity:surface, up:vector) * up:vector.
+local lock obtHdng to vang(obtProProjOntoHorizon, north:vector).
+local lock srfHdng to vang(srfProProjOntoHorizon, north:vector).
+local lock obtPitch to 90 - vang(ship:velocity:orbit, up:vector).
+local lock srfPitch to 90 - vang(ship:velocity:surface, up:vector).
 
 set ship:control:pilotmainthrottle to 0.
 sas on.
@@ -129,7 +119,11 @@ until lastEcc < ship:orbit:eccentricity {
   local ttcirc to burnTime1(dvToCirc).
 
   local dt to time:seconds - lastTime.
+  //print "lastEta = " + lastEta..
+  //print "eta:apoapsis = " + eta:apoapsis..
+  //print "dt = " + dt.
   local etaRate to (lastETA - eta:apoapsis) / dt.
+  //print "etaRate = " + etaRate.
   local tteta to eta:apoapsis / etaRate.
   if eta:periapsis < eta:apoapsis {
     set tteta to ttcirc.
@@ -192,4 +186,5 @@ until lastEcc < ship:orbit:eccentricity {
 unlock steering.
 lock throttle to 0.
 
-wait 0.05. // wait for throttle change to take effect.
+wait 1. // wait for throttle change to take effect.
+}

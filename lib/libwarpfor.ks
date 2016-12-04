@@ -32,7 +32,7 @@ function warpUntilZero {
 
   local curVal to lastVal.
   local curTime to time:seconds.
-  lock dt to curTime - lastTime.
+  local lock dt to curTime - lastTime.
 
   function getRate {
     parameter curVal, lastVal, dt.
@@ -43,8 +43,8 @@ function warpUntilZero {
     }
   }
 
-  lock rate to getRate(curVal, lastVal, dt).
-  lock timeToZero to -curVal / rate.
+  local lock rate to getRate(curVal, lastVal, dt).
+  local lock timeToZero to -curVal / rate.
 
   until curVal <= 0 {
     if timeToZero < warpSpeeds[i] * 1.5 {

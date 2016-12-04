@@ -26,11 +26,8 @@ print "tgtAccel  :" at (2, 12).
 print "gSurf     :" at (2, 13).
 print "throt     :" at (2, 14).
 
-local tgtVel to 0.
-lock tgtVel to -trueAlt() / 20 - 2.
-
-local maxEngineAccel to 0.
-lock maxEngineAccel to myMaxThrust / mass.
+local lock tgtVel to -trueAlt() / 20 - 2.
+local lock maxEngineAccel to myMaxThrust / mass.
 
 lock steering to lookdirup(-ship:obt:velocity:surface, ship:facing:topvector).
 local throt to 0.

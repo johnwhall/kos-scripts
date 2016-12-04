@@ -25,11 +25,9 @@ print "tgtAccel  :" at (2, 14).
 print "gHere     :" at (2, 15).
 print "throt     :" at (2, 16).
 
-local tgtVel to 0.
-lock tgtVel to -trueAlt() / 20 - 2.
+local lock tgtVel to -trueAlt() / 20 - 2.
 
-local maxEngineAccel to 0.
-lock maxEngineAccel to myMaxThrust / mass.
+local lock maxEngineAccel to myMaxThrust / mass.
 
 local gHere to body:mu / (body:radius ^ 2).
 

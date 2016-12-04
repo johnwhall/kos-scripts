@@ -70,7 +70,7 @@ function syncCallback {
 genericBurn(syncTime, syncBT, turnTime, ullageTime, syncCallback@).
 genericBurnRCS(time:seconds + turnTime, 1, turnTime, syncCallback@).
 
-lock tgtRelVel to tgt:obt:velocity:orbit - ship:obt:velocity:orbit.
+local lock tgtRelVel to tgt:obt:velocity:orbit - ship:obt:velocity:orbit.
 
 lock steering to tgt:position.
 wait until faceDiff(false) < 0.5.
@@ -78,9 +78,9 @@ wait until faceDiff(false) < 0.5.
 pushRCS(true).
 
 until tgt:position:mag < tgtDist and tgtRelVel:mag < 0.05 {
-  lock unwantedVel to vxcl(tgt:position, tgtRelVel).
-  lock unwantedTopVel to vxcl(ship:facing:starvector, unwantedVel).
-  lock unwantedStarVel to vxcl(ship:facing:topvector, unwantedVel).
+  local lock unwantedVel to vxcl(tgt:position, tgtRelVel).
+  local lock unwantedTopVel to vxcl(ship:facing:starvector, unwantedVel).
+  local lock unwantedStarVel to vxcl(ship:facing:topvector, unwantedVel).
 
   local topSign to 1.
   if vang(ship:facing:topvector, unwantedTopVel) > 45 {
