@@ -188,7 +188,7 @@ public class LambertSolver {
 			_angleParameter *= -1;
 		}
 		_angleParameter2 = _angleParameter * _angleParameter;
-		_angleParameter3 = _angleParameter3 * _angleParameter;
+		_angleParameter3 = _angleParameter2 * _angleParameter;
 
 		_normalizedTime = 4 * _dt * Math.sqrt(_mu / (m * m * m));
 		_parabolicNormalizedTime = 2.0 / 3 * (1 - _angleParameter3);

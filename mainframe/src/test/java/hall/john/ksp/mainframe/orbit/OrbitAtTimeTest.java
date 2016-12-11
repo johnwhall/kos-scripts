@@ -3,7 +3,6 @@ package hall.john.ksp.mainframe.orbit;
 import static org.junit.Assert.assertEquals;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-
 import org.junit.Test;
 
 import hall.john.ksp.mainframe.Body;
@@ -73,21 +72,24 @@ public class OrbitAtTimeTest {
 
 	@Test
 	public void calcECIVectors3() {
-		OrbitAtTime oat = new OrbitAtTime(new Body("A", 1), 0.8, 0.61237244, Math.PI / 4, 0, Math.toRadians(215.26438968), Math.toRadians(144.73561032));
+		OrbitAtTime oat = new OrbitAtTime(new Body("A", 1), 0.8, 0.61237244, Math.PI / 4, 0,
+				Math.toRadians(215.26438968), Math.toRadians(144.73561032));
 		TestUtils.assertVectorRelativelyEquals(1, 0, 0, oat.getRadiusVector(), 1e-5);
 		TestUtils.assertVectorRelativelyEquals(0.5, 0.5, 0.5, oat.getVelocityVector(), 1e-5);
 	}
 
 	@Test
 	public void calcECIVectors4() {
-		OrbitAtTime oat = new OrbitAtTime(new Body("A", 1), 0.66667, 0.79056942, Math.PI / 2, 0, Math.toRadians(71.56505118), Math.toRadians(198.43494882));
+		OrbitAtTime oat = new OrbitAtTime(new Body("A", 1), 0.66667, 0.79056942, Math.PI / 2, 0,
+				Math.toRadians(71.56505118), Math.toRadians(198.43494882));
 		TestUtils.assertVectorRelativelyEquals(0, 0, -1, oat.getRadiusVector(), 1e-5);
 		TestUtils.assertVectorRelativelyEquals(0.5, 0, 0.5, oat.getVelocityVector(), 1e-5);
 	}
 
 	@Test
 	public void calcECIVectors5() {
-		OrbitAtTime oat = new OrbitAtTime(new Body("A", 1), 0.66667, 0.5, Math.PI / 4, 3 * Math.PI / 2, Math.PI, Math.PI);
+		OrbitAtTime oat = new OrbitAtTime(new Body("A", 1), 0.66667, 0.5, Math.PI / 4, 3 * Math.PI / 2, Math.PI,
+				Math.PI);
 		TestUtils.assertVectorRelativelyEquals(0, -1, 0, oat.getRadiusVector(), 1e-5);
 		TestUtils.assertVectorRelativelyEquals(0.5, 0, 0.5, oat.getVelocityVector(), 1e-5);
 	}

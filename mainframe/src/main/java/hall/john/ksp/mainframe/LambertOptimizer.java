@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 
@@ -27,14 +28,12 @@ public class LambertOptimizer {
 	private boolean _optArrival;
 
 	// Calculated
-	private Vector3D _dv1;
-	private Vector3D _dv2;
-	private Double _t;
-	private Double _dt;
-	private double _bestDV = Double.MAX_VALUE;
+	private Candidate _best;
 	private long _count;
-	private long _lastPct;
-	private long _numCalcs;
+	private long _numTCalcs;
+	private long _numDTCalcs;
+
+	private static int NUM_THREADS = 8;
 
 	public LambertOptimizer(double mu, OrbitAtTime oat0, OrbitAtTime tgtOat0, double tMin, double tMax, double tStep,
 			double dtMin, double dtMax, double dtStep, boolean allowLob, boolean optArrival) {
@@ -49,84 +48,110 @@ public class LambertOptimizer {
 		_dtStep = dtStep;
 		_allowLob = allowLob;
 		_optArrival = optArrival;
-		long numTCalcs = (long) ((_tMax - _tMin) / (_tStep));
-		long numDTCalcs = (long) ((_dtMax - _dtMin) / (_dtStep));
-		_numCalcs = numTCalcs * numDTCalcs;
+		_numTCalcs = (long) ((_tMax - _tMin) / (_tStep)) + 1L;
+		_numDTCalcs = (long) ((_dtMax - _dtMin) / (_dtStep)) + 1L;
+	}
+
+	private Candidate executeSingle(double t, double dt) {
+		OrbitAtTime oatAtBurn1 = _oat0.afterTime(t);
+		Vector3D r1 = oatAtBurn1.getRadiusVector();
+
+		OrbitAtTime tgtOatAtIntercept = _tgtOat0.afterTime(t + dt);
+		Vector3D r2 = tgtOatAtIntercept.getRadiusVector();
+
+		LambertSolver ls = new LambertSolver(_mu, r1, r2, dt, 0, true);
+		ls.solve();
+
+		List<Solution> sols = ls.getSolutions();
+		if (sols.isEmpty()) {
+			return null;
+		} else {
+			Vector3D v1 = sols.get(0).v1;
+			Vector3D v2 = sols.get(0).v2;
+
+			Candidate candidate = new Candidate();
+			candidate.dv1 = v1.subtract(oatAtBurn1.getVelocityVector());
+			candidate.dv2 = tgtOatAtIntercept.getVelocityVector().subtract(v2);
+			candidate.dv = candidate.dv1.getNorm();
+			candidate.t = t;
+			candidate.dt = dt;
+
+			if (_optArrival) {
+				candidate.dv += candidate.dv2.getNorm();
+			}
+
+			if (!_allowLob) {
+				double a = 1 / ((2 / r1.getNorm()) - (v1.getNormSq() / _mu));
+				Vector3D eVec = (v1.crossProduct(r1.crossProduct(v1))).scalarMultiply(1 / _mu).subtract(r1.normalize());
+				double e = eVec.getNorm();
+				double apoapsis = a * (1 + e);
+				if (apoapsis > r2.getNorm())
+					return null;
+			}
+
+			return candidate;
+		}
 	}
 
 	public void execute() {
-		ExecutorService executor = Executors.newFixedThreadPool(1);
+		ExecutorService executor = Executors.newFixedThreadPool(NUM_THREADS);
 
-		for (double t = _tMin; t <= _tMax; t += _tStep) {
-			OrbitAtTime oatAtBurn1 = _oat0.afterTime(t);
-			Vector3D r1 = oatAtBurn1.getRadiusVector();
-
-			for (double dt = _dtMin; dt <= _dtMax; dt += _dtStep) {
-				OrbitAtTime tgtOatAtIntercept = _tgtOat0.afterTime(t + dt);
-				Vector3D r2 = tgtOatAtIntercept.getRadiusVector();
-
-				LambertSolver ls = new LambertSolver(_mu, r1, r2, dt, 0, true);
-				ls.solve();
-
-				List<Solution> sols = ls.getSolutions();
-				if (!sols.isEmpty()) {
-					Vector3D v1 = sols.get(0).v1;
-					Vector3D v2 = sols.get(0).v2;
-
-					Vector3D dv1 = v1.subtract(oatAtBurn1.getVelocityVector());
-					Vector3D dv2 = tgtOatAtIntercept.getVelocityVector().subtract(v2);
-					double dv = dv1.getNorm();
-					if (_optArrival) {
-						dv += dv2.getNorm();
-					}
-
-					if (!_allowLob) {
-						double a = 1 / ((2 / r1.getNorm()) - (v1.getNormSq() / _mu));
-						Vector3D eVec = (v1.crossProduct(r1.crossProduct(v1))).scalarMultiply(1 / _mu)
-								.subtract(r1.normalize());
-						double e = eVec.getNorm();
-						double apoapsis = a * (1 + e);
-						if (apoapsis > r2.getNorm())
-							return;
-					}
-
-					if (dv < _bestDV) {
-						_dv1 = dv1;
-						_dv2 = dv2;
-						_t = t;
-						_dt = dt;
-						_bestDV = dv;
+		for (int i = 0; i < NUM_THREADS; i++) {
+			final int threadNum = i;
+			Runnable run = () -> {
+				long count = 0;
+				Candidate best = null;
+				for (long tIdx = threadNum; tIdx < _numTCalcs; tIdx += NUM_THREADS) {
+					double t = _tMin + tIdx * _tStep;
+					for (double dtIdx = 0; dtIdx < _numDTCalcs; dtIdx++) {
+						double dt = _dtMin + dtIdx * _dtStep;
+						Candidate candidate = executeSingle(t, dt);
+						if (candidate != null) {
+							if (best == null || candidate.dv < best.dv) {
+								best = candidate;
+							}
+						}
+						count++;
 					}
 				}
 
-				executor.submit(() -> {
-					synchronized (LambertOptimizer.this) {
-						_count++;
-						long pct = 100 * _count / _numCalcs;
-						if (pct >= _lastPct + 10) {
-							System.out.println(String.format("%10d / %d: %3d%%", _count, _numCalcs, pct));
-							_lastPct += 10;
-						}
+				synchronized (this) {
+					if (_best == null || best.dv < _best.dv) {
+						_best = best;
 					}
-				});
-			}
+					_count += count;
+				}
+			};
+
+			executor.execute(run);
+		}
+
+		try {
+			executor.shutdown();
+			executor.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e);
 		}
 	}
 
 	public Vector3D getDV1() {
-		return _dv1;
+		return _best.dv1;
 	}
 
 	public Vector3D getDV2() {
-		return _dv2;
+		return _best.dv2;
 	}
 
 	public Double getT() {
-		return _t;
+		return _best.t;
 	}
 
 	public Double getDT() {
-		return _dt;
+		return _best.dt;
+	}
+
+	public long getCount() {
+		return _count;
 	}
 
 	public static Map<String, Object> mainframe(List<String> requestArgs) {
@@ -220,5 +245,10 @@ public class LambertOptimizer {
 		result.put("normal", node.getNormal());
 		result.put("radial", node.getRadial());
 		return result;
+	}
+
+	private static class Candidate {
+		public Vector3D dv1, dv2;
+		public double t, dt, dv;
 	}
 }

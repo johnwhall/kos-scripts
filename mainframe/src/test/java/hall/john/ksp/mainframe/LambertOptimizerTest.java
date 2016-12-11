@@ -1,6 +1,7 @@
 package hall.john.ksp.mainframe;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.junit.Assert;
 import org.junit.Test;
 
 import hall.john.ksp.mainframe.orbit.OrbitAtTime;
@@ -33,6 +34,7 @@ public class LambertOptimizerTest {
 		double t = lo.getT();
 		double dt = lo.getDT();
 
+		Assert.assertEquals(26866, lo.getCount());
 		TestUtils.assertVectorRelativelyEquals(-2336.2055666333, 1777.9481837768, 943.6883666524, dv1, 1e-9);
 		TestUtils.assertVectorRelativelyEquals(695.681151565, -465.8924054596, -251.8111713676, dv2, 1e-9);
 		TestUtils.assertRelativelyEquals(2040, t, 1e-9);
@@ -50,10 +52,10 @@ public class LambertOptimizerTest {
 				new Vector3D(3739.2505332585, 6699.759359006, 0.0116932746));
 
 		double tMin = 0;
-		double tMax = 120538.278779887 * 5;
+		double tMax = 120538.278779887 * 1;
 		double tStep = 1205.38278779887 / 100;
-		double dtMin = 5172.92991419679 / 5;
-		double dtMax = 5672.92991419679 * 5;
+		double dtMin = 5172.92991419679 / 1;
+		double dtMax = 5672.92991419679 * 1;
 		double dtStep = 1;
 
 		LambertOptimizer lo = new LambertOptimizer(mu, oat0, tgtOat0, tMin, tMax, tStep, dtMin, dtMax, dtStep, true,
@@ -65,78 +67,10 @@ public class LambertOptimizerTest {
 		double t = lo.getT();
 		double dt = lo.getDT();
 
-		TestUtils.assertVectorRelativelyEquals(-2336.2055666333, 1777.9481837768, 943.6883666524, dv1, 1e-9);
-		TestUtils.assertVectorRelativelyEquals(695.681151565, -465.8924054596, -251.8111713676, dv2, 1e-9);
-		TestUtils.assertRelativelyEquals(2040, t, 1e-9);
-		TestUtils.assertRelativelyEquals(368200, dt, 1e-9);
+		Assert.assertEquals(5010501, lo.getCount());
+		TestUtils.assertVectorRelativelyEquals(79.2032486357, -259.367961919, -0.00045215772593656077, dv1, 1e-9);
+		TestUtils.assertVectorRelativelyEquals(-164.2847412747, 424.4642747304, 0.0007407846716598644, dv2, 1e-9);
+		TestUtils.assertRelativelyEquals(55459.662066626006, t, 1e-9);
+		TestUtils.assertRelativelyEquals(5172.92991419679, dt, 1e-9);
 	}
-
-	/* Failing inputs:
-	 *
-	 * @formatter:off
-	 *
-	 * A Hohmann transfer works much better in this case.
-	 *
-	 * Waiting for requests
-	 * Received request: lambertoptimize
-	 * mu = 3.986004418E14
-	 * r1 = {5,507,077.05790552; -3,584,709.45138777; -6.256561471}
-	 * v1 = {4,248.8908942288; 6,527.4400999656; 0.0113926318}
-	 * r2 = {5,912,477.98807351; -3,299,855.30599648; -5.7593520033}
-	 * v2 = {3,739.2505332585; 6,699.759359006; 0.0116932746}
-	 * tMin = 0.0
-	 * tMax = 120538.278779887
-	 * tStep = 1205.38278779887
-	 * dtMin = 5172.92991419679
-	 * dtMax = 5672.92991419679
-	 * dtStep = 1.0
-	 * allowLob = true
-	 * dv1 = {-36.5706757418; 270.1618210816; 0.0004708914}
-	 * dv2 = {67.9357223398; -443.0565321801; -0.0007730526}
-	 * dv = 272.62579462439527
-	 * t = 110895.21647749598
-	 * dt = 5172.92991419679
-	 *
-	 * Waiting for requests
-	 * Received request: lambertoptimize
-	 * mu = 3.986004418E14
-	 * r1 = {5,507,077.05790552; -3,584,709.45138777; -6.256561471}
-	 * v1 = {4,248.8908942288; 6,527.4400999656; 0.0113926318}
-	 * r2 = {5,912,477.98807351; -3,299,855.30599648; -5.7593520033}
-	 * v2 = {3,739.2505332585; 6,699.759359006; 0.0116932746}
-	 * tMin = 109689.833689697
-	 * tMax = 112100.599265295
-	 * tStep = 24.1076557559775
-	 * dtMin = 4922.92991419679
-	 * dtMax = 5422.92991419679
-	 * dtStep = 1.0
-	 * allowLob = true
-	 * dv1 = {220.0342890534; -8.9588451393; -0.0000158569}
-	 * dv2 = {-395.0563301927; -40.3534326321; -0.0000698572}
-	 * dv = 220.21659625345606
-	 * t = 109689.833689697
-	 * dt = 4922.92991419679
-	 *
-	 * Waiting for requests
-	 * Received request: lambertoptimize
-	 * mu = 3.986004418E14
-	 * r1 = {5,507,077.05790552; -3,584,709.45138777; -6.256561471}
-	 * v1 = {4,248.8908942288; 6,527.4400999656; 0.0113926318}
-	 * r2 = {5,912,477.98807351; -3,299,855.30599648; -5.7593520033}
-	 * v2 = {3,739.2505332585; 6,699.759359006; 0.0116932746}
-	 * tMin = 109639.833689697
-	 * tMax = 109739.833689697
-	 * tStep = 1.0
-	 * dtMin = 4672.92991419679
-	 * dtMax = 5172.92991419679
-	 * dtStep = 1.0
-	 * allowLob = true
-	 * dv1 = {203.7132842996; -67.0723476057; -0.0001171758}
-	 * dv2 = {-389.775322167; 28.1278942202; 0.0000496209}
-	 * dv = 214.47098175155557
-	 * t = 109639.833689697
-	 * dt = 4814.92991419679
-	 *
-	 * @formatter:on
-	 */
 }
