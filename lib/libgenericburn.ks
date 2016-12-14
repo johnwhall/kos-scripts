@@ -12,6 +12,7 @@ function genericBurnRCS {
   parameter p_burnTime.
   parameter p_turnTime.
   parameter p_callback.
+  parameter p_turnWithRCS is false.
 
   lock throttle to 0.
 
@@ -36,7 +37,8 @@ function genericBurnRCS {
   // We might have just warped a lot, so update the values
   set burnMidTime to libgenericburn_getBurnMidTime(p_when).
 
-  pushRCS(false).
+  if p_turnWithRCS { pushRCS(true). }
+  else { pushRCS(false). }
   pushSAS(false).
 
   // call callback with predictDir=true so it can predict the value ahead of time

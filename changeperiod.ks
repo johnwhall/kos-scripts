@@ -23,7 +23,7 @@ function pointVecCallback {
 local tgtSMA to (body:mu * tgtPeriod^2 / (4 * constant:pi^2))^(1/3).
 local tgtVelAtApo to sqrt(body:mu * (2 / (body:radius + ship:obt:apoapsis) - 1 / tgtSMA)).
 local curVelAtApo to sqrt(body:mu * (2 / (body:radius + ship:obt:apoapsis) - 1 / ship:obt:semimajoraxis)).
-local bt to burnTime1(abs(tgtVelAtApo - curVelAtApo)).
+local bt to burnTime(abs(tgtVelAtApo - curVelAtApo)).
 print "tgtVelAtApo: " + tgtVelAtApo.
 print "curVelAtApo: " + curVelAtApo.
 print "bt: " + bt.

@@ -4,7 +4,7 @@
 
 parameter initialTurnAngle, initialTurnStartSpeed, orbitalTurnEndAltitude, targetInclination, targetAltitude.
 
-{
+runoncepath("lib/libsasrcsstack").
 runoncepath("lib/libengine").
 runoncepath("lib/libsmoothturn").
 runoncepath("lib/libburntime").
@@ -46,7 +46,7 @@ local lock obtPitch to 90 - vang(ship:velocity:orbit, up:vector).
 local lock srfPitch to 90 - vang(ship:velocity:surface, up:vector).
 
 set ship:control:pilotmainthrottle to 0.
-sas on.
+pushSAS(true).
 gear off.
 lock throttle to 1.
 wait 1. // wait for lock throttle to take effect
@@ -89,6 +89,8 @@ until engineFlamedOut(igEs) {
   lock throttle to max(0, min(1, mass * 5 * 9.82 / max(0.1, maxthrust))).
 }
 
+pushRCS(true).
+set ship:control:fore to 1.
 stage. // jettison interstage fairing and decouple booster
 wait 2.
 
@@ -98,6 +100,8 @@ wait 2.
 unlock steering.
 
 stage. // second stage ignition
+set ship:control:fore to 0.
+popRCS().
 wait 8. // wait for SAS and the engine to help stabilize us
 stage. // jettison payload fairing
 
@@ -116,7 +120,7 @@ wait 1.
 local startTime to time:seconds.
 until lastEcc < ship:orbit:eccentricity {
   local dvToCirc to sqrt(body:mu / (body:radius + apoapsis)) - ship:velocity:orbit:mag.
-  local ttcirc to burnTime1(dvToCirc).
+  local ttcirc to burnTime(dvToCirc).
 
   local dt to time:seconds - lastTime.
   //print "lastEta = " + lastEta..
@@ -185,6 +189,6 @@ until lastEcc < ship:orbit:eccentricity {
 
 unlock steering.
 lock throttle to 0.
+popSAS().
 
 wait 1. // wait for throttle change to take effect.
-}

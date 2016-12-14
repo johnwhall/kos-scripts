@@ -13,7 +13,8 @@ function closestApproach {
   }
 
   local res to bracketingMinimizationMethod1(dist@, fromTime, toTime, 10, tol).
-  return lexicon("time", res["x"], "minDist", res["min"]).
+  local speed to (velocityat(ship, res["x"]):orbit - velocityat(tgt, res["x"]):orbit):mag.
+  return lexicon("time", res["x"], "minDist", res["min"], "speed", speed).
 }
 
 //local calcStartTime to time:seconds.

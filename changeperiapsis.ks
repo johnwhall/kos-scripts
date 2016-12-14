@@ -23,7 +23,7 @@ local tgtSMA to (ship:obt:apoapsis + tgtPer + 2 * body:radius) / 2.
 local v to sqrt(body:mu * (2 / (ship:obt:apoapsis + body:radius) - 1 / ship:obt:semimajoraxis)).
 local tgtV to sqrt(body:mu * (2 / (ship:obt:apoapsis + body:radius) - 1 / tgtSMA)).
 local dv to abs(tgtV - v).
-local bt to burnTime1(dv).
+local bt to burnTime(dv).
 
 local throt to 0.
 lock throttle to throt.

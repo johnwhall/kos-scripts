@@ -88,7 +88,7 @@ function lambertOptimize {
   parameter optArrival is true.
   parameter startTime is time:seconds.
 
-  local synodicPeriod to 1 / ((1 / s1:orbit:period) - (1 / s2:orbit:period)).
+  local synodicPeriod to 1 / abs((1 / s1:orbit:period) - (1 / s2:orbit:period)).
   local dtMin to 0.
   local dtMax to max(s1:orbit:period, s2:orbit:period).
 

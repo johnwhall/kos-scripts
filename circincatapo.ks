@@ -11,7 +11,7 @@ local done to false.
 until done {
   local n to nodeToCircIncAtApo(tgtInc).
   add n.
-  local bt to burnTime1(n:deltaV:mag).
+  local bt to burnTime(n:deltaV:mag).
 
   local burnStartTime to 0.
   local lastPrint to time:seconds.

@@ -13,8 +13,14 @@ function waitForFacing {
 
   local minDiff to faceDiff(includeRoll).
 
+  local nextPrintTime to time:seconds.
   local curDiff to minDiff.
   until curDiff < tgtDiff {
+    if time:seconds >= nextPrintTime {
+      print "Waiting for facing. Current offset: " + curDiff.
+      set nextPrintTime to time:seconds + 10.
+    }
+
     if curDiff < minDiff {
       set minDiff to curDiff.
     } else if curDiff > 1.05 * minDiff {

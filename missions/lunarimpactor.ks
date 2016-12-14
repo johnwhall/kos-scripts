@@ -31,7 +31,7 @@ function burnToIntercept {
   local ullageTime to 0.
   local ts to 10.
 
-  local bt to burnTime1(nextnode:deltav:mag).
+  local bt to burnTime(nextnode:deltav:mag).
   local burnMidTime to time:seconds + nextnode:eta.
 
   function cb {

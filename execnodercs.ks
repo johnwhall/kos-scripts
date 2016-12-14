@@ -1,6 +1,6 @@
 @lazyglobal off.
 
-parameter p_isp, p_thrust, p_turnTime.
+parameter p_isp, p_thrust, p_turnTime, p_turnWithRCS is false.
 
 runoncepath("lib/libburntime").
 runoncepath("lib/libgenericburn").
@@ -23,5 +23,5 @@ function cb {
   return lexicon("dir", nextnode:deltav, "throt", throt, "val", nextnode:deltav:mag).
 }
 
-genericBurnRCS(burnMidTime, bt, p_turnTime, cb@).
+genericBurnRCS(burnMidTime, bt, p_turnTime, cb@, p_turnWithRCS).
 remove nextnode.

@@ -15,8 +15,8 @@ local tgtSMA to (ship:obt:periapsis + tgtApo + 2 * body:radius) / 2.
 local v to sqrt(body:mu * (2 / (ship:obt:periapsis + body:radius) - 1 / ship:obt:semimajoraxis)).
 local tgtV to sqrt(body:mu * (2 / (ship:obt:periapsis + body:radius) - 1 / tgtSMA)).
 local dv to abs(tgtV - v).
-local bt to burnTime1(dv).
-local halfDVTime to burnTime1(dv / 2).
+local bt to burnTime(dv).
+local halfDVTime to burnTime(dv / 2).
 
 local burnStartTime to targetTime - halfDVTime.
 local burnEndTime to burnStartTime + bt.

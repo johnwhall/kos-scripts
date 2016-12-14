@@ -1,24 +1,17 @@
 @lazyglobal off.
 
-parameter port, manDist to 25.
+parameter port, manDist to 25, rotation to 0.
 
 runoncepath("lib/libfacediff").
 runoncepath("lib/libsasrcsstack").
-
-pushRCS(false).
+runoncepath("lib/libvecdraw").
 
 clearVecDraws().
 local highlightPort to highlight(port, rgb(0, 1, 1)).
 set highlightPort:enabled to true.
 
-lock steering to lookdirup(port:nodeposition, ship:facing:topvector).
-wait until faceDiff(true) < 0.5.
-
-local tgtDist to manDist.
+local lock tgtDist to manDist.
 local lock desiredPosition to port:nodeposition + tgtDist * port:portfacing:vector.
-
-popRCS().
-pushRCS(true).
 
 local lastTime to time:seconds.
 local lastDist to port:nodeposition:mag.
@@ -41,9 +34,11 @@ local lock starVel to (curStarDistVec - lastStarDistVec) / (curTime - lastTime).
 local lock curStarDist to curStarDistVec:mag.
 local lock starRate to (curStarDist - lastStarDist) / (curTime - lastTime).
 
-local desPosDraw to vecdraw(port:nodeposition, desiredPosition - port:nodeposition, rgb(1, 0, 0), "", 1, true, 0.2).
+local desPosDraw to vecdraw(port:nodeposition, desiredPosition - port:nodeposition, rgb(1, 0, 0)).
 local topDistVecDraw to vecdraw(ship:position, V(0, 0, 0), rgb(0, 1, 0)).
 local starDistVecDraw to vecdraw(ship:position, V(0, 0, 0), rgb(0, 0, 1)).
+local tgtRotVecDraw to vecdraw(port:nodeposition, 3 * port:rotation:vector, rgb(1, 1, 0)).
+local topVecDraw to vecdraw(ship:position, 3 * ship:facing:topvector, rgb(1, 1, 0)).
 
 function dock_updateDists {
   set lastTime to curTime.
@@ -58,40 +53,18 @@ function dock_updateDists {
 }
 
 function dock_updateVecDraws {
-  parameter showTopStarVecs.
-
-  set desPosDraw:start to port:nodeposition.
-  set desPosDraw:vec to desiredPosition - port:nodeposition.
-
-  if showTopStarVecs {
-    set topDistVecDraw:start to ship:position.
-    set topDistVecDraw:vec to curTopDistVec.
-    set topDistVecDraw:show to true.
-    set starDistVecDraw:start to ship:position.
-    set starDistVecDraw:vec to curStarDistVec.
-    set starDistVecDraw:show to true.
-  } else {
-    set topDistVecDraw:show to false.
-    set starDistVecDraw:show to false.
-  }
+  parameter showDetailVecs.
+  updateVecDraw(desPosDraw, port:nodeposition, desiredPosition - port:nodeposition, true).
+  updateVecDraw(topDistVecDraw, ship:position, curTopDistVec, showDetailVecs).
+  updateVecDraw(starDistVecDraw, ship:position, curStarDistVec, showDetailVecs).
+  updateVecDraw(tgtRotVecDraw, port:nodeposition, 3 * port:rotation:vector, showDetailVecs).
+  updateVecDraw(topVecDraw, ship:position, 3 * ship:facing:topvector, showDetailVecs).
 }
 
 function dock_setFore {
   parameter tgtRate.
   set ship:control:fore to max(-1, min(1, 10 * (distRate -  tgtRate))).
   //print "curDist: " + curDist + " distRate: " + distRate + " tgtRate: " + tgtRate.
-}
-
-function dock_cancelTop {
-  local topSign to -1.
-  if vang(ship:facing:topvector, topVel) > 90 { set topSign to 1. }
-  set ship:control:top to max(-1, min(1, topSign * 5 * topVel:mag)).
-}
-
-function dock_cancelStar {
-  local starSign to -1.
-  if vang(ship:facing:starvector, starVel) > 90 { set starSign to 1. }
-  set ship:control:starboard to max(-1, min(1, starSign * 5 * starVel:mag)).
 }
 
 function dock_setTop {
@@ -112,16 +85,17 @@ function dock_setStar {
   set ship:control:starboard to max(-1, min(1, starSign * starScale)).
 }
 
-until abs(distRate) < 0.1 and abs(manDist - curDist) < 1 {
-  // move to the maneuver distance
-  dock_updateDists().
-  dock_setFore(max(-2, min(2, (tgtDist - curDist) / 20))).
-  dock_cancelTop().
-  dock_cancelStar().
-  dock_updateVecDraws(true).
-  wait 0.05.
-}
+print "Moving to maneuver distance".
+runpath("closeapproach", port, manDist).
 
+pushRCS(true).
+pushSAS(false).
+
+print "Facing target".
+lock steering to lookdirup(port:nodeposition, angleaxis(rotation, port:nodeposition) * port:rotation:vector).
+wait until faceDiff(true) < 0.5.
+
+print "Lining up".
 until desiredPosition:mag < 0.5 {
   // move to in front of the target docking port
   dock_updateDists().
@@ -132,17 +106,22 @@ until desiredPosition:mag < 0.5 {
   wait 0.05.
 }
 
+print "Moving in to dock".
 until port:state <> "Ready" {
   // move in to dock
+  lock tgtDist to curDist.
   dock_updateDists().
-  dock_setFore(-0.1).
-  dock_setTop(-curTopDist / 50).
-  dock_setStar(-curStarDist / 50).
+  dock_setFore(-0.2).
+  local topStarScale to 50.
+  if curDist < 10 { set topStarScale to 200. }
+  dock_setTop(-curTopDist / topStarScale).
+  dock_setStar(-curStarDist / topStarScale).
   dock_updateVecDraws(true).
   wait 0.05.
 }
 
 popRCS().
+popSAS().
 unlock steering.
 set highlightPort:enabled to false.
 clearVecDraws().

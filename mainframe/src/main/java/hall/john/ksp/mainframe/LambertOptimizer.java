@@ -115,7 +115,7 @@ public class LambertOptimizer {
 					}
 				}
 
-				synchronized (this) {
+				synchronized (LambertOptimizer.this) {
 					if (_best == null || best.dv < _best.dv) {
 						_best = best;
 					}

@@ -5,7 +5,7 @@ parameter p_turnTime, p_ullageTime.
 runoncepath("lib/libburntime").
 runoncepath("lib/libgenericburn").
 
-local bt to burnTime1(nextnode:deltav:mag).
+local bt to burnTime(nextnode:deltav:mag).
 local burnMidTime to time:seconds + nextnode:eta.
 
 function execnode_cb {

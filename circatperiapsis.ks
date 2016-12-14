@@ -5,7 +5,7 @@ run once funs.
 local vPer to sqrt(body:mu * (2 / (ship:obt:periapsis + body:radius) - 1 / ship:obt:semimajoraxis)).
 local vCirc to sqrt(body:mu / (ship:obt:periapsis + body:radius)).
 local dv to vPer - vCirc.
-local bt to burnTime1(dv).
+local bt to burnTime(dv).
 
 local throt to 0.
 lock throttle to throt.
