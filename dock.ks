@@ -2,9 +2,9 @@
 
 parameter port, manDist to 25, rotation to 0.
 
-runoncepath("lib/libfacediff").
 runoncepath("lib/libsasrcsstack").
 runoncepath("lib/libvecdraw").
+runoncepath("lib/libwaitforfacing").
 
 clearVecDraws().
 local highlightPort to highlight(port, rgb(0, 1, 1)).
@@ -93,7 +93,7 @@ pushSAS(false).
 
 print "Facing target".
 lock steering to lookdirup(port:nodeposition, angleaxis(rotation, port:nodeposition) * port:rotation:vector).
-wait until faceDiff(true) < 0.5.
+waitForFacing(0.5, true, false, false).
 
 print "Lining up".
 until desiredPosition:mag < 0.5 {

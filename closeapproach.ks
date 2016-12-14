@@ -3,7 +3,7 @@
 parameter tgt, tgtDist.
 
 runoncepath("lib/libsasrcsstack").
-runoncepath("lib/libfacediff").
+runoncepath("lib/libwaitforfacing").
 
 pushSAS(false).
 pushRCS(true).
@@ -15,7 +15,7 @@ else { print "Unknown target type: " + tgt:typename(). exit. }
 local lock tgtRelVel to ship:obt:velocity:orbit - tgtVel.
 
 lock steering to lookdirup(tgt:position, ship:facing:topvector).
-wait until faceDiff(false) < 0.5.
+waitForFacing(0.5, false, false, false).
 
 until tgt:position:mag < tgtDist and tgtRelVel:mag < 0.05 {
   set ship:control:top to max(-1, min(1, 5 * -vdot(ship:facing:topvector, tgtRelVel))).
