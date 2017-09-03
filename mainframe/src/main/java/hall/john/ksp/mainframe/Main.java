@@ -53,7 +53,7 @@ public class Main {
 			try (FileOutputStream fos = new FileOutputStream(KSP_RESULT_DONE_FILE)) {
 			}
 
-			Thread.sleep(1000); // wait for kOS to delete the request done file
+			Thread.sleep(1000);// wait for kOS to delete the request done file
 		}
 	}
 

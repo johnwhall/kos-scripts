@@ -103,7 +103,7 @@ stage. // second stage ignition
 set ship:control:fore to 0.
 popRCS().
 wait 8. // wait for SAS and the engine to help stabilize us
-stage. // jettison payload fairing
+when ship:altitude > body:atm:height then { stage. } // jettison payload fairing
 
 local lastEcc to ship:orbit:eccentricity.
 local lastLAN to ship:orbit:longitudeofascendingnode.
@@ -118,7 +118,7 @@ local pitchEnd to pitchStart.
 wait 1.
 
 local startTime to time:seconds.
-until lastEcc < ship:orbit:eccentricity {
+until ship:orbit:periapsis > body:atm:height and lastEcc < ship:orbit:eccentricity {
   local dvToCirc to sqrt(body:mu / (body:radius + apoapsis)) - ship:velocity:orbit:mag.
   local ttcirc to burnTime(dvToCirc).
 
@@ -192,3 +192,4 @@ lock throttle to 0.
 popSAS().
 
 wait 1. // wait for throttle change to take effect.
+unlock throttle.

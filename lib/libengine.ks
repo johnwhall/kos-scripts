@@ -55,3 +55,9 @@ function currentTWR {
   local gHere to body:mu / (body:radius + altitude)^2.
   return T / (gHere * mass).
 }
+
+function waitForStablePropellant {
+  for eng in ignitedEngines() {
+    wait until eng:getModule("ModuleEnginesRF"):getField("propellant") = "Very Stable".
+  }
+}

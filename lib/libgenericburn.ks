@@ -47,16 +47,15 @@ function genericBurnRCS {
   lock steering to lookdirup(dir, ship:facing:topvector).
 
   print " ".
-  print "Waiting for facing at " + time:seconds + ". Initial offset: " + facediff().
+  print "Waiting for facing at " + time:seconds.
   print "Time to burn start: " + (burnStartTime - time:seconds).
   print "Time to burn middle: " + timeToBurnMid.
   print "Time to burn end: " + (burnEndTime - time:seconds).
   print "Burn time: " + p_burnTime.
   print "Burn mid time: " + burnMidTime.
 
-  wait until faceDiff() < 0.5.
-  //waitForFacing(0.5, false, false).
-  //warpFor1(burnStartTime - time:seconds).
+  waitForFacing(0.5, false, false, false).
+  print "Facing achieved. Waiting to start burn".
   wait until time:seconds > burnStartTime.
 
   print " ".
@@ -137,7 +136,7 @@ function genericBurn {
   lock steering to lookdirup(dir, ship:facing:topvector).
 
   print " ".
-  print "Waiting for facing at " + time:seconds + ". Initial offset: " + facediff().
+  print "Waiting for facing at " + time:seconds.
   print "Time to ullage start: " + (ullageStartTime - time:seconds).
   print "Time to burn start: " + (burnStartTime - time:seconds).
   print "Time to burn middle: " + timeToBurnMid.

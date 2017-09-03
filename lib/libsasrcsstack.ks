@@ -15,8 +15,10 @@ function pushRCS {
 }
 
 function popRCS {
-  local prevRCS to g_rcsStack:pop().
-  set rcs to prevRCS.
+  if not g_rcsStack:empty {
+    local prevRCS to g_rcsStack:pop().
+    set rcs to prevRCS.
+  }
   wait 0.01.
 }
 
@@ -28,8 +30,10 @@ function pushSAS {
 }
 
 function popSAS {
-  local prevSAS to g_sasStack:pop().
-  set sas to prevSAS.
+  if not g_sasStack:empty {
+    local prevSAS to g_sasStack:pop().
+    set sas to prevSAS.
+  }
   wait 0.01.
 }
 

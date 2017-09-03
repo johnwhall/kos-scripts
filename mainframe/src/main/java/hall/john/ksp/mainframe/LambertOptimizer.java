@@ -107,6 +107,19 @@ public class LambertOptimizer {
 						double dt = _dtMin + dtIdx * _dtStep;
 						Candidate candidate = executeSingle(t, dt);
 						if (candidate != null) {
+//							OrbitAtTime orbitAtBurn = _oat0.afterTime(t);
+//							ManeuverNode node = new ManeuverNode(orbitAtBurn, candidate.dv1);
+//							OrbitAtTime newOAT = node.getResultingOAT();
+//							if (newOAT.getPeriapsis() < 6571000) {
+//								continue;
+//							}
+
+//							OrbitAtTime orbitAtIntercept = newOAT.afterTime(dt);
+//							OrbitAtTime targetAtIntercept = _tgtOat0.afterTime(t + dt);
+//							Vector3D radiusAtIntercept = orbitAtIntercept.getRadiusVector();
+//							Vector3D targetRadiusAtIntercept = targetAtIntercept.getRadiusVector();
+//							double dist = targetRadiusAtIntercept.subtract(radiusAtIntercept).getNorm();
+
 							if (best == null || candidate.dv < best.dv) {
 								best = candidate;
 							}
@@ -192,10 +205,10 @@ public class LambertOptimizer {
 		boolean optArrival = Boolean.parseBoolean(requestArgs.get(20));
 
 		System.out.println("mu = " + mu);
-		System.out.println("r1 = " + r1);
-		System.out.println("v1 = " + v1);
-		System.out.println("r2 = " + r2);
-		System.out.println("v2 = " + v2);
+		System.out.println("r1 = " + Utils.formatVector(r1));
+		System.out.println("v1 = " + Utils.formatVector(v1));
+		System.out.println("r2 = " + Utils.formatVector(r2));
+		System.out.println("v2 = " + Utils.formatVector(v2));
 		System.out.println("t: (min: " + tMin + " step: " + tStep + " max: " + tMax + ")");
 		System.out.println("dt: (min: " + dtMin + " step: " + dtStep + " max: " + dtMax + ")");
 		System.out.println("allowLob = " + allowLob);
@@ -213,15 +226,15 @@ public class LambertOptimizer {
 		double t = lo.getT();
 		double dt = lo.getDT();
 
-		System.out.println("dv1 = " + dv1 + " (norm: " + dv1.getNorm() + ")");
-		System.out.println("dv2 = " + dv2 + " (norm: " + dv2.getNorm() + ")");
+		System.out.println("dv1 = " + Utils.formatVector(dv1) + " (norm: " + dv1.getNorm() + ")");
+		System.out.println("dv2 = " + Utils.formatVector(dv2) + " (norm: " + dv2.getNorm() + ")");
 		System.out.println("t = " + t);
 		System.out.println("dt = " + dt);
 
 		OrbitAtTime orbitAtBurn = oat0.afterTime(t);
 		OrbitAtTime targetAtBurn = tgtOat0.afterTime(t);
-		System.out.println("radiusAtBurn = " + orbitAtBurn.getRadiusVector());
-		System.out.println("targetRadiusAtBurn = " + targetAtBurn.getRadiusVector());
+		System.out.println("radiusAtBurn = " + Utils.formatVector(orbitAtBurn.getRadiusVector()));
+		System.out.println("targetRadiusAtBurn = " + Utils.formatVector(targetAtBurn.getRadiusVector()));
 
 		ManeuverNode node = new ManeuverNode(orbitAtBurn, dv1);
 		OrbitAtTime newOAT = node.getResultingOAT();
@@ -230,8 +243,8 @@ public class LambertOptimizer {
 		Vector3D radiusAtIntercept = orbitAtIntercept.getRadiusVector();
 		Vector3D targetRadiusAtIntercept = targetAtIntercept.getRadiusVector();
 
-		System.out.println("radiusAtIntercept = " + radiusAtIntercept);
-		System.out.println("targetRadiusAtIntercept = " + targetRadiusAtIntercept);
+		System.out.println("radiusAtIntercept = " + Utils.formatVector(radiusAtIntercept));
+		System.out.println("targetRadiusAtIntercept = " + Utils.formatVector(targetRadiusAtIntercept));
 		double dist = targetRadiusAtIntercept.subtract(radiusAtIntercept).getNorm();
 		System.out.println("distance = " + dist);
 		System.out.println("prograde = " + node.getPrograde());

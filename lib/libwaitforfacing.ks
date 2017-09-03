@@ -3,7 +3,7 @@
 runoncepath("lib/libfacediff").
 
 function waitForFacing {
-  parameter tgtDiff, includeRoll is true, stabilizeAtEnd is true, stabilizeDuring is true.
+  parameter tgtDiff, includeRoll is true, stabilizeAtEnd is true, stabilizeDuring is true, tgtRate is 99999.
 
   if kuniverse:timewarp:mode = "RAILS" {
     // Just in case something accidentally left us in rails warp,
@@ -11,13 +11,21 @@ function waitForFacing {
     set kuniverse:timewarp:warp to 0.
   }
 
-  local minDiff to faceDiff(includeRoll).
-
   local nextPrintTime to time:seconds.
-  local curDiff to minDiff.
-  until curDiff < tgtDiff {
+
+  local minDiff to faceDiff(includeRoll).
+  local lastDiff to minDiff.
+  local lastTime to time:seconds.
+
+  wait 0.05.
+
+  local curDiff to faceDiff(includeRoll).
+  local curTime to time:seconds.
+  local lock diffRate to (curDiff - lastDiff) / (curTime - lastTime).
+  local lock done to curDiff < tgtDiff and abs(diffRate) < tgtRate.
+  until done {
     if time:seconds >= nextPrintTime {
-      print "Waiting for facing. Current offset: " + curDiff.
+      print "Waiting for facing. Current offset: " + curDiff + " Current rate: " + diffRate.
       set nextPrintTime to time:seconds + 10.
     }
 
@@ -33,7 +41,11 @@ function waitForFacing {
       }
     }
 
+    wait 0.05.
+    set lastDiff to curDiff.
+    set lastTime to curTime.
     set curDiff to faceDiff(includeRoll).
+    set curTime to time:seconds.
   }
 
   if stabilizeAtEnd {
@@ -41,5 +53,10 @@ function waitForFacing {
     set kuniverse:timewarp:warp to 1.
     wait until kuniverse:timewarp:issettled.
     set kuniverse:timewarp:warp to 0.
+    wait until kuniverse:timewarp:issettled.
   }
+
+  // Force some game ticks so flight controls work immediately after returning.
+  // For some reason, a single tick isn't enough.
+  wait 1.
 }

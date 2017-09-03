@@ -77,4 +77,84 @@ public class LambertOptimizerTest {
 			TestUtils.assertRelativelyEquals(5172.92991419679, dt, 1e-9);
 		}
 	}
+
+	@Test
+	public void test3() {
+		for (int i = 0; i < 100; i++) {
+			Body b = new Body("Earth", 3.986004418E14);
+			double mu = b.getMu();
+
+			OrbitAtTime oat0 = new OrbitAtTime(b, new Vector3D(6217625.33521472, -719829.378348098, 1918106.38746952),
+					new Vector3D(1657.6952993448, 7081.1412827167, -2921.2092857134));
+			OrbitAtTime tgtOat0 = new OrbitAtTime(b,
+					new Vector3D(5680511.51363976, -2590290.72677682, 2614657.68661689),
+					new Vector3D(3839.9493325346, 6297.5479758191, -2114.4648415501));
+
+			double tMin = 190.0;
+			double tMax = 149488.979965825;
+			double tStep = 14.9298979965825;
+			double dtMin = 0;
+			double dtMax = 5539.93622202688;
+			double dtStep = 11.0798724440538;
+
+			LambertOptimizer lo = new LambertOptimizer(mu, oat0, tgtOat0, tMin, tMax, tStep, dtMin, dtMax, dtStep, true,
+					true);
+			lo.execute();
+
+			Vector3D dv1 = lo.getDV1();
+			Vector3D dv2 = lo.getDV2();
+			double t = lo.getT();
+			double dt = lo.getDT();
+			double dv = dv1.getNorm();
+
+			// Assert.assertEquals(5010501, lo.getCount());
+			System.out.println(Utils.formatVector(dv1) + " " + Utils.formatVector(dv2) + " " + dv + " " + t + " " + dt);
+			TestUtils.assertVectorRelativelyEquals(-53.8684534113, -5.4429244818, 38.1615193021, dv1, 1e-9);
+			TestUtils.assertVectorRelativelyEquals(96.4589692851, -68.725636472, -25.1248120869, dv2, 1e-9);
+			TestUtils.assertRelativelyEquals(140949.07831177983, t, 1e-9);
+			TestUtils.assertRelativelyEquals(2648.0895141288584, dt, 1e-9);
+		}
+	}
+
+	@Test
+	public void test4() {
+		Body b = new Body("Earth", 3.986004418E14);
+		double mu = b.getMu();
+
+		OrbitAtTime oat0 = new OrbitAtTime(b, new Vector3D(6217625.33521472, -719829.378348098, 1918106.38746952),
+				new Vector3D(1657.6952993448, 7081.1412827167, -2921.2092857134));
+		OrbitAtTime tgtOat0 = new OrbitAtTime(b, new Vector3D(5680511.51363976, -2590290.72677682, 2614657.68661689),
+				new Vector3D(3839.9493325346, 6297.5479758191, -2114.4648415501));
+
+		double tMin = 140904.28861779007;
+		double tMax = 140904.28861779007;
+		double tStep = 1;
+		double dtMin = 2736.7284936812885;
+		double dtMax = 2736.7284936812885;
+		double dtStep = 1;
+
+		// double tMin = 104817.865364057;
+		// double tMax = 104817.865364057;
+		// double tStep = 1;
+		// double dtMin = 3589.71892698532;
+		// double dtMax = 3589.71892698532;
+		// double dtStep = 1;
+
+		LambertOptimizer lo = new LambertOptimizer(mu, oat0, tgtOat0, tMin, tMax, tStep, dtMin, dtMax, dtStep, true,
+				false);
+		lo.execute();
+
+		Vector3D dv1 = lo.getDV1();
+		Vector3D dv2 = lo.getDV2();
+		double t = lo.getT();
+		double dt = lo.getDT();
+		double dv = dv1.getNorm();
+
+		// Assert.assertEquals(5010501, lo.getCount());
+		System.out.println(dv1 + " " + dv2 + " " + dv + " " + t + " " + dt);
+		TestUtils.assertVectorRelativelyEquals(79.2032486357, -259.367961919, -0.00045215772593656077, dv1, 1e-9);
+		TestUtils.assertVectorRelativelyEquals(-164.2847412747, 424.4642747304, 0.0007407846716598644, dv2, 1e-9);
+		TestUtils.assertRelativelyEquals(55459.662066626006, t, 1e-9);
+		TestUtils.assertRelativelyEquals(5172.92991419679, dt, 1e-9);
+	}
 }
