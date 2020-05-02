@@ -28,3 +28,18 @@ function lerp {
   local tn to (t - t0) / (t1 - t0).
   return (1 - tn) * v0 + tn * v1.
 }
+
+function toVector {
+  parameter vecOrDir.
+  if vecOrDir:typename() = "Direction" { return vecOrDir:vector. }
+  else { return vecOrDir. }
+}
+
+function clamp {
+  parameter v.
+  parameter vMin.
+  parameter vMax.
+  if v < vMin { return vMin. }
+  else if v > vMax { return vMax. }
+  return v.
+}
