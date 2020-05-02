@@ -25,8 +25,6 @@ function lerp {
   parameter t.
   parameter t0 is 0.
   parameter t1 is 1.
-  local tn to (t - t0) / (t1 - t0). // TODO: test
-  //print "lerp: " + v0 + " " + v1 + " " + tn + " = " + ((1 - tn) * v0 + tn * v1).
-  //log "lerp: " + v0 + " " + v1 + " " + tn + " = " + ((1 - tn) * v0 + tn * v1) to fly.log.
+  local tn to (t - t0) / (t1 - t0).
   return (1 - tn) * v0 + tn * v1.
 }
