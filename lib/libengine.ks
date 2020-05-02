@@ -21,6 +21,15 @@ function currentThrust {
   return t.
 }
 
+local function propStab {
+  parameter mod.
+  local prop to mod:getField("propellant").
+  local parenOpenIdx to prop:find("(").
+  local pctIdx to prop:find("%").
+  local pctStr to prop:substring(parenOpenIdx + 1, pctIdx - parenOpenIdx - 1).
+  return pctStr:toNumber() / 100.
+}
+
 function propellantStability {
   // TODO: This is not safe if a physics tick occurs between hasField and getField because the field might disappear.
   //       But I also don't want to artifically introduce a physics tick in a low-level helper function like this.
@@ -30,11 +39,14 @@ function propellantStability {
   local mods to shp:modulesNamed("ModuleEnginesRF").
   for mod in mods {
     if mod:hasField("propellant") {
-      local prop to mod:getField("propellant").
-      local parenOpenIdx to prop:find("(").
-      local pctIdx to prop:find("%").
-      local pctStr to prop:substring(parenOpenIdx + 1, pctIdx - parenOpenIdx - 1).
-      set minStability to min(minStability, pctStr:toNumber()).
+      set minStability to min(minStability, propStab(mod)).
     }
   }
+
+  return minStability.
+}
+
+function propellantStable {
+  parameter shp is ship.
+  return propellantStability(shp) = 1.
 }

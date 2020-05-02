@@ -25,7 +25,9 @@ function lerp {
   parameter t.
   parameter t0 is 0.
   parameter t1 is 1.
+  parameter clampT is false.
   local tn to (t - t0) / (t1 - t0).
+  if clampT { set tn to clamp(tn, 0, 1). }
   return (1 - tn) * v0 + tn * v1.
 }
 

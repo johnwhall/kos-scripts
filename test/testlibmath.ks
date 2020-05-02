@@ -90,6 +90,8 @@ runSimple("lerp(10, 20, 1.5, 1, 2)", 15).
 runSimple("lerp(10, 20, 2, 1, 2)", 20).
 runSimple("lerp(10, 20, 3, 1, 2)", 30).
 runSimple("lerp(10, 20, 0, 1, 2)", 0).
+runSimple("lerp(10, 20, 3, 1, 2, true)", 20).
+runSimple("lerp(10, 20, 0, 1, 2, true)", 10).
 runSimple("lerp(20, 10, 0)", 20).
 runSimple("lerp(20, 10, 0.5)", 15).
 runSimple("lerp(20, 10, 1)", 10).

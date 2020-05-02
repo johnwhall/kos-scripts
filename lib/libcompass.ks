@@ -4,7 +4,7 @@ runoncepath("lib/libmath.ks").
 
 function horizon {
   parameter shp is ship.
-  return vxcl(shp:up:vector, shp:facing:vector).
+  return vxcl(shp:up:vector, shp:facing:vector):normalized.
 }
 
 function head {
@@ -14,8 +14,9 @@ function head {
 
 function pitch {
   parameter shp is ship.
+  parameter vec is shp:facing:vector.
   // TODO: there has got to be an easier way to do this
-  return vangs180(shp:facing:vector, horizon(shp), heading(head(shp) + 90, 0):vector).
+  return vangs180(vec, horizon(shp), heading(head(shp) + 90, 0):vector).
 }
 
 function roll {
