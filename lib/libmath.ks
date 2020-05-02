@@ -1,16 +1,8 @@
 @lazyglobal off.
 
-function vangs {
-  // Angle to rotate a to b about axis n (counterclockwise is positive)
-  // See https://math.stackexchange.com/questions/2140504/how-to-calculate-signed-angle-between-two-vectors-in-3d
-  parameter n.
-  parameter a.
-  parameter b.
-  return arcsin(vcrs(n:normalized, a) * b / (a:mag * b:mag)).
-}
-
 function vangs360 {
-  // Angle to rotate a to b about axis n (counterclockwise is positive)
+  // Angle to rotate a to b from vantage point of n looking toward -n (counterclockwise is positive)
+  // NOT from vantage point of -n looking toward n
   // See https://math.stackexchange.com/questions/2140504/how-to-calculate-signed-angle-between-two-vectors-in-3d
   parameter a.
   parameter b.
