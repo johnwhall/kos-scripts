@@ -22,8 +22,8 @@ function currentThrust {
 }
 
 local function propStab {
-  parameter mod.
-  local prop to mod:getField("propellant").
+  parameter m.
+  local prop to m:getField("propellant").
   local parenOpenIdx to prop:find("(").
   local pctIdx to prop:find("%").
   local pctStr to prop:substring(parenOpenIdx + 1, pctIdx - parenOpenIdx - 1).
@@ -37,9 +37,9 @@ function propellantStability {
 
   local minStability to 1.
   local mods to shp:modulesNamed("ModuleEnginesRF").
-  for mod in mods {
-    if mod:hasField("propellant") {
-      set minStability to min(minStability, propStab(mod)).
+  for m in mods {
+    if m:hasField("propellant") {
+      set minStability to min(minStability, propStab(m)).
     }
   }
 
