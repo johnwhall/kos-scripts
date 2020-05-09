@@ -1,5 +1,11 @@
 @lazyglobal off.
 
+function makeOrbit {
+  parameter inc, e, sma, lan, argPe, mEp, t, bdy.
+  if core:version = "1.2.1.0" { set mEp to mEp * constant:degToRad. } // https://github.com/KSP-KOS/KOS/pull/2689
+  return createOrbit(inc, e, sma, lan, argPe, mEp, t, bdy).
+}
+
 // TODO: maneuver nodes, SOI transitions
 function predictOrbit {
   parameter t. // target time (universal)
@@ -9,9 +15,7 @@ function predictOrbit {
 
   // Keep everything the same except epoch, which is shifted
   local dt to t - orbt:epoch.
-  local ma to orbt:meanAnomalyAtEpoch.
-  if core:version = "1.2.1.0" { set ma to ma * constant:degToRad. } // https://github.com/KSP-KOS/KOS/pull/2689
-  return createOrbit(orbt:inclination, orbt:eccentricity, orbt:semiMajorAxis, orbt:longitudeOfAscendingNode, orbt:argumentOfPeriapsis, ma, orbt:epoch - dt, orbt:body).
+  return makeOrbit(orbt:inclination, orbt:eccentricity, orbt:semiMajorAxis, orbt:longitudeOfAscendingNode, orbt:argumentOfPeriapsis, orbt:meanAnomalyAtEpoch, orbt:epoch - dt, orbt:body).
 }
 
 // TODO: KSP swaps y and z components of vectors?
@@ -49,5 +53,6 @@ function orbitFromStateVectors {
     set ma to ea - e * sin(ea).
   }
 
+  // TODO: https://github.com/KSP-KOS/KOS/pull/2689
   return createOrbit(i, e, a, lan, aop, ma, t, bdy).
 }

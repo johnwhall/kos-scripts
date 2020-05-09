@@ -18,18 +18,18 @@ runoncepath("lib/liborbit").
 //
 //print ship:orbit:position.
 
-local ofsv to orbitFromStateVectors(ship:position - body:position, ship:velocity:orbit - body:velocity:orbit, body).
-print ofsv:position.
-print ofsv:velocity:orbit.
-print ofsv:period.
+//local ofsv to orbitFromStateVectors(ship:position - body:position, ship:velocity:orbit - body:velocity:orbit, body).
+//print ofsv:position.
+//print ofsv:velocity:orbit.
+//print ofsv:period.
 
-//clearVecDraws().
-//
-//local poHalf to predictOrbit(time:seconds + ship:orbit:period / 2).
-//local halfVecDraw to vecDraw(ship:position, { return poHalf:position. }, white, "", 1, true).
-//local poQuart to predictOrbit(time:seconds + ship:orbit:period / 4).
-//local quartVecDraw to vecDraw(ship:position, { return poQuart:position. }, blue, "", 1, true).
-//local po3Quart to predictOrbit(time:seconds + 3 * ship:orbit:period / 4).
-//local threeQuartVecDraw to vecDraw(ship:position, { return po3Quart:position. }, green, "", 1, true).
-//
-//wait 100.
+clearVecDraws().
+
+local poHalf to predictOrbit(time:seconds + ship:orbit:period / 2).
+local halfVecDraw to vecDraw(ship:position, { return poHalf:position. }, white, "", 1, true).
+local poQuart to predictOrbit(time:seconds + ship:orbit:period / 4).
+local quartVecDraw to vecDraw(ship:position, { return poQuart:position. }, blue, "", 1, true).
+local po3Quart to predictOrbit(time:seconds + 3 * ship:orbit:period / 4).
+local threeQuartVecDraw to vecDraw(ship:position, { return po3Quart:position. }, green, "", 1, true).
+
+wait 100.

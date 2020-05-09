@@ -50,3 +50,32 @@ function propellantStable {
   parameter shp is ship.
   return propellantStability(shp) = 1.
 }
+
+local function singleIsp {
+  parameter e, situation.
+  if situation = "current" { return e:isp. }
+  else if situation = "sealevel" { return e:slisp. }
+  else if situation = "vacuum" { return e:visp. }
+  else { print "unknown situation: " + situation. exit. }
+}
+
+function specificImpulse {
+  parameter engineList is ignitedEngines().
+  parameter situation is "current". // "sealevel", "current", or "vacuum"
+
+  local t to 0.
+  local b to 0.
+
+  for e in engineList {
+    set t to t + e:availablethrust.
+    set b to b + e:availablethrust / singleIsp(e, situation).
+  }
+
+  return t / b.
+}
+
+function burnTime {
+  parameter Δv, isp is specificImpulse(), T is ship:availablethrust, m is ship:mass.
+  local ve to isp * constant:g0.
+  return (m * ve / T) * (1 - constant:e^(-Δv / ve)).
+}

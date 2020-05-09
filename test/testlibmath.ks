@@ -98,6 +98,9 @@ runSimple("lerp(20, 10, 1)", 10).
 runSimple("lerp(20, 10, 2)", 0).
 runSimple("lerp(20, 10, -1)", 30).
 
+runSimple("toVector(V(1, 1, 1))", V(1, 1, 1)).
+runSimple("toVector(R(30, -30, 60))", V(-0.433012, -0.5, 0.75), 1e-6).
+
 runSimple("clamp(50, 50, 100)", 50).
 runSimple("clamp(25, 50, 100)", 50).
 runSimple("clamp(75, 50, 100)", 75).
