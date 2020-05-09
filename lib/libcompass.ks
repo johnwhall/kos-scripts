@@ -19,6 +19,8 @@ function pitch {
   return vangs180(vec, horizon(shp), heading(head(shp) + 90, 0):vector).
 }
 
+// TODO: Sometimes this disagrees with MechJeb, e.g. when MJ's pitch=-47.6 roll=70.2 head=230.7
+//       Seems the farther pitch is from 0, the roll error gets worse?
 function roll {
   parameter shp is ship.
   local h to horizon(shp).

@@ -2,7 +2,9 @@
 
 //parameter stageList is list(1.5).
 //parameter stageList is list(1.5, 52.5).
-parameter stageList is list(1.5, 31).
+//parameter stageList is list(1.5, 31).
+//parameter stageList is list(5, 54.4).
+parameter stageList is list(5, 90.45).
 
 set ship:control:pilotMainThrottle to 1.
 

@@ -72,7 +72,59 @@ function s2ydhms {
 function padLeft {
   parameter str, tgtWidth, padChar.
   local str to "" + str.
-  local pad to "".
-  until str:length + pad:length >= tgtWidth { set pad to pad + padChar. }
+  local pad to repeatString(padChar, max(0, tgtWidth - str:length)).
   return pad + str.
+}
+
+function padRight {
+  parameter str, tgtWidth, padChar.
+  local str to "" + str.
+  local pad to repeatString(padChar, max(0, tgtWidth - str:length)).
+  return str + pad.
+}
+
+function repeatString {
+  parameter str, count.
+  local out to "".
+  for i in range(count) { set out to out + str. }
+  return out.
+}
+
+function formatDecimal {
+  parameter d, wholePlaces is 0, decimalPlaces is 0, maxDecimalPlaces is -1.
+
+  if maxDecimalPlaces <> -1 and maxDecimalPlaces < decimalPlaces {
+    print "maxDecimalPlaces (" + maxDecimalPlaces + ") must be >= decimalPlaces(" + decimalPlaces + ")".
+    exit.
+  }
+
+  local neg to d < 0.
+  set d to abs(d).
+  if maxDecimalPlaces <> -1 { set d to round(d, maxDecimalPlaces). }
+
+  local str to "" + d.
+  local wholeStr to str.
+  local fracStr to "".
+  local hasFrac to false.
+
+  if str:contains("e") { return str. } // not sure what to do for scientific notation
+
+  local perIdx to str:find(".").
+  if perIdx >= 0 {
+    set wholeStr to str:substring(0, perIdx).
+    set fracStr to str:substring(perIdx + 1, str:length - perIdx - 1).
+    set hasFrac to true.
+  }
+
+  set wholeStr to padLeft(wholeStr, wholePlaces, "0").
+  set fracStr to padRight(fracStr, decimalPlaces, "0").
+  if maxDecimalPlaces <> -1 and fracStr:length > maxDecimalPlaces {
+    set fracStr to fracStr:substring(0, maxDecimalPlaces).
+  }
+
+  local out to wholeStr.
+  if maxDecimalPlaces > 0 or hasFrac or decimalPlaces > 0 { set out to out + "." + fracStr. }
+  if neg { set out to "-" + out. }
+
+  return out.
 }
