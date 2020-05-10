@@ -13,10 +13,8 @@ function head {
 }
 
 function pitch {
-  parameter shp is ship.
-  parameter vec is shp:facing:vector.
-  // TODO: there has got to be an easier way to do this
-  return vangs180(vec, horizon(shp), heading(head(shp) + 90, 0):vector).
+  parameter shp is ship, vec is shp:facing:vector.
+  return 90 - vangs180(shp:up:vector, vec).
 }
 
 // TODO: Sometimes this disagrees with MechJeb, e.g. when MJ's pitch=-47.6 roll=70.2 head=230.7
