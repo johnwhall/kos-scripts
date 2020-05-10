@@ -9,6 +9,7 @@ function vangs360 {
 function vangs180 {
   // https://stackoverflow.com/a/33920320
   parameter a, b, n is vcrs(a, b).
+  if n = V(0, 0, 0) { return 0. }
   return arctan2(vcrs(a, b) * n:normalized, a * b).
 }
 

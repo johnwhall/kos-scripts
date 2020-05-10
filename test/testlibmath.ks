@@ -75,6 +75,15 @@ runSimple("vangs180(V(-sqrt(2)/2, -sqrt(2)/2, 0), V(1, 0, 0), V(0, 0, -1))", -13
 runSimple("vangs180(V(         0,         -1, 0), V(1, 0, 0), V(0, 0, -1))", -90).
 runSimple("vangs180(V( sqrt(2)/2, -sqrt(2)/2, 0), V(1, 0, 0), V(0, 0, -1))", -45).
 
+// Various situations where n = a x b = 0
+runSimple("vangs180(V( 1,  0,  0), V( 1,  0,  0))", 0).
+runSimple("vangs180(V(-1,  0,  0), V(-1,  0,  0))", 0).
+runSimple("vangs180(V( 0,  1,  0), V( 0,  1,  0))", 0).
+runSimple("vangs180(V( 0, -1,  0), V( 0, -1,  0))", 0).
+runSimple("vangs180(V( 0,  0,  1), V( 0,  0,  1))", 0).
+runSimple("vangs180(V( 0,  0, -1), V( 0,  0, -1))", 0).
+runSimple("vangs180(V( 1,  0,  0), V(-1,  0,  0))", 0).
+
 runSimple("lerp(10, 20, 0)", 10).
 runSimple("lerp(10, 20, 0.5)", 15).
 runSimple("lerp(10, 20, 1)", 20).
