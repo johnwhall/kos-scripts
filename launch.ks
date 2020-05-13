@@ -3,8 +3,15 @@
 runoncepath("lib/libcompass").
 runoncepath("lib/libengine").
 runoncepath("lib/libfacing").
+runoncepath("lib/liblaunch").
 
-local topVec to ship:facing:topVector.
+local tgtInc to 90.
+local launchAzimuth to 3.
+
+local rollControl to false.
+local initialTopVec to ship:facing:topVector.
+local lock earlyRoll to choose initialTopVec if rollControl else ship:facing:topVector.
+
 local gtPitch0 to 80.
 local gtSpd0 to 50.
 local gtSpdf to 100.
@@ -13,7 +20,7 @@ print "INITIAL".
 sas off.
 rcs off.
 lock throttle to 1.
-lock steering to lookDirUp(ship:up:vector, topVec).
+lock steering to lookDirUp(ship:up:vector, earlyRoll).
 stage. // ignite engine
 
 wait until currentThrust() > 0.95 * ship:availableThrust.
@@ -26,26 +33,27 @@ local horizonVecDraw to vecDraw(ship:position, { return 20 * horizon(). }, red, 
 
 wait until ship:verticalspeed > gtSpd0.
 print "GRAVITY TURN INITIAL".
-lock steering to lookDirUp(heading(90, lerp(90, gtPitch0, ship:verticalSpeed, gtSpd0, gtSpdf, true)):vector, topVec).
+lock steering to lookDirUp(heading(launchAzimuth, lerp(90, gtPitch0, ship:verticalSpeed, gtSpd0, gtSpdf, true)):vector, earlyRoll).
 
-wait until vang(ship:velocity:surface, heading(90, gtPitch0):vector) < 0.25.
-print "GRAVITY TURN RETRACT".
-local pitch0 to pitch().
-local t0 to time:seconds.
-local tf to t0 + 5.
-lock steering to lookDirUp(heading(head(), lerp(pitch0, gtPitch0, time:seconds, t0, tf, true)):vector, topVec).
-
-wait until vang(ship:velocity:surface, ship:facing:vector) < 0.25.
+// Wait for turn, then wait for velocity vector to catch up
+wait until pitch() - gtPitch0 < 0.25.
+wait until pitch(ship, ship:velocity:surface) < gtPitch0.
 print "GRAVITY TURN".
-lock steering to lookDirUp(ship:velocity:surface, topVec).
+local headPicker to HeadingPicker(launchAzimuth, tgtInc).
+lock steering to lookDirUp(heading(headPicker:pick(), pitch(ship, ship:velocity:surface)):vector, earlyRoll).
+//lock steering to lookDirUp(ship:velocity:surface, earlyRoll). // TODO: use launch azimuth
 
 wait until ship:altitude > 100000.
 print "COAST".
 lock throttle to 0.
 stage. // decouple 1st stage & fairings
 rcs on.
-local head0 to head().
-lock steering to lookDirUp(heading(head0, -6):vector, topVec).
+//local head0 to head().
+// TODO: base this on orbital heading instead of surface heading
+//       or just force to launch azimuth until we start needing to fine-tune inclination
+//lock steering to lookDirUp(heading(head0, -6):vector, earlyRoll).
+
+lock steering to lookDirUp(heading(headPicker:pick(), -3):vector, earlyRoll).
 
 wait until angleToSteering() < 0.25.
 wait until eta:apoapsis < 85.

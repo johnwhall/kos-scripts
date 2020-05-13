@@ -14,13 +14,13 @@ function head {
 
 function pitch {
   parameter shp is ship, vec is shp:facing:vector.
-  return 90 - vangs180(shp:up:vector, vec).
+  return 90 - vang(shp:up:vector, vec).
 }
 
-// TODO: Sometimes this disagrees with MechJeb, e.g. when MJ's pitch=-47.6 roll=70.2 head=230.7
-//       Seems the farther pitch is from 0, the roll error gets worse?
 function roll {
-  parameter shp is ship.
-  local h to horizon(shp).
-  return vangs180(angleAxis(90, shp:up:vector) * h, shp:facing:starvector, h).
+  // TODO: credit KSPLib libnavball?
+  parameter shp is ship, vec is shp:facing:topVector.
+  local x to vdot(shp:facing:topVector, shp:up:vector).
+  if x < 1e-6 { return 0. }
+  return -arctan2(vdot(shp:facing:topVector, vcrs(shp:up:vector, shp:facing:vector)), x).
 }

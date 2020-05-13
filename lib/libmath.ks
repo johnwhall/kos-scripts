@@ -1,16 +1,18 @@
 @lazyglobal off.
 
 function vangs360 {
-  parameter a, b, n is vcrs(a, b).
+  // NOTE: This returns the right-handed angle
+  parameter a, b, n.
   local a180 to vangs180(a, b, n).
   return choose a180 if a180 >= 0 else 360 + a180.
 }
 
 function vangs180 {
   // https://stackoverflow.com/a/33920320
-  parameter a, b, n is vcrs(a, b).
-  if n = V(0, 0, 0) { return 0. }
-  return arctan2(vcrs(a, b) * n:normalized, a * b).
+  // NOTE: This returns the right-handed angle
+  parameter a, b, n.
+  if n = V(0, 0, 0) { return choose 0 if vdot(a, b) >= 0 else 180. }
+  return arctan2(vcrs(a, b) * n:normalized, a * b). // vcrs args swapped due to left-handed KSP
 }
 
 function lerp {
