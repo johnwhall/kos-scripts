@@ -1,12 +1,6 @@
 @lazyglobal off.
 
-local function sign {
-  // TODO: Move to libmath & add tests
-  parameter x.
-  if x > 0 { return 1. }
-  else if x = 0 { return 0. }
-  else { return -1. }
-}
+runoncepath("lib/libmath").
 
 // TODO: Basing this off the sign might not be good if the sign would flip normally?  (tgtInc=180?)
 //       Instead, wait until absolute difference is minimized?

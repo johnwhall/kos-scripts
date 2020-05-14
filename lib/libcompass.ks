@@ -3,13 +3,13 @@
 runoncepath("lib/libmath.ks").
 
 function horizon {
-  parameter shp is ship.
-  return vxcl(shp:up:vector, shp:facing:vector):normalized.
+  parameter shp is ship, vec is shp:facing:vector.
+  return vxcl(shp:up:vector, vec):normalized.
 }
 
 function head {
-  parameter shp is ship.
-  return vangs360(shp:north:vector, horizon(shp), shp:up:vector).
+  parameter shp is ship, vec is shp:facing:vector.
+  return vangs360(shp:north:vector, horizon(shp, vec), shp:up:vector).
 }
 
 function pitch {
@@ -18,7 +18,7 @@ function pitch {
 }
 
 function roll {
-  // TODO: credit KSPLib libnavball?
+  // TODO: credit KSPLib libnavball
   parameter shp is ship, vec is shp:facing:topVector.
   local x to vdot(shp:facing:topVector, shp:up:vector).
   if x < 1e-6 { return 0. }

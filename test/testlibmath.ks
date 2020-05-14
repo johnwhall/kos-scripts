@@ -110,3 +110,16 @@ runSimple("clamp(25, 50, 100)", 50).
 runSimple("clamp(75, 50, 100)", 75).
 runSimple("clamp(100, 50, 100)", 100).
 runSimple("clamp(125, 50, 100)", 100).
+
+runSimple("sign(0.1)", 1).
+runSimple("sign(0)", 0).
+runSimple("sign(-0.1)", -1).
+
+runSimple("angleDiff(0, 15)", 15).
+runSimple("angleDiff(0, -15)", 15).
+runSimple("angleDiff(15, -15)", 30).
+runSimple("angleDiff(150, -150)", 60).
+runSimple("angleDiff(-150, 150)", 60).
+runSimple("angleDiff(-150 - 360, 150 + 360)", 60).
+runSimple("angleDiff(150, 270)", 120).
+runSimple("angleDiff(315, 270)", 45).

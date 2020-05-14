@@ -32,3 +32,17 @@ function clamp {
   parameter v, vMin, vMax.
   return min(max(v, vMin), vMax).
 }
+
+function sign {
+  // TODO: Move to libmath & add tests
+  parameter x.
+  if x > 0 { return 1. }
+  else if x = 0 { return 0. }
+  else { return -1. }
+}
+
+function angleDiff {
+  parameter a, b.
+  local diff to abs(mod(a - b, 360)).
+  return choose diff if diff <= 180 else 360 - diff.
+}
