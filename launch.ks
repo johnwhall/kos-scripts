@@ -36,7 +36,7 @@ wait until currentThrust() > 0.95 * ship:availableThrust.
 print "LAUNCH".
 stage. // disconnect launch clamp
 
-wait until ship:verticalspeed > gtSpd0.
+wait until ship:verticalSpeed > gtSpd0.
 print "GRAVITY TURN INITIAL".
 lock steering to lookDirUp(heading(laz, lerp(90, gtPitch0, ship:verticalSpeed, gtSpd0, gtSpdf, true)):vector, tgtTopVec).
 
@@ -53,19 +53,19 @@ wait until ship:altitude > 100000.
 set ship:control:pilotmainthrottle to 0.
 stage. // decouple 1st stage & fairings
 
-// Wait until we leave the atmosphere or else we'll waste RCS fighting it
+// Wait until we leave the atmosphere or else we'll waste RCS propellant fighting it
 wait until ship:altitude > body:atm:height.
 
 rcs on.
 //lock steering to lookDirUp(heading(headPicker:pick(), 0):vector, tgtTopVec).
 lock steering to lookDirUp(heading(head(ship, ship:velocity:orbit), 0):vector, tgtTopVec).
 
+local cbt0 to time:seconds.
+local circBurnTime to calcCircBurnTime(267, 33).
+local cbtf to time:seconds.
+print "circBurnTime took " + round(cbtf - cbt0, 2) + " seconds".
+
 wait until angleToSteering() < 0.25.
-
-local circBurnTime to ttab(267, 33).
-
-//local cirBurnDuration to 120.
-//local circBurnTime to time:seconds + eta:apoapsis - 75. //cirBurnDuration / 2.
 
 // cancel manual timewarp
 wait until time:seconds > circBurnTime - 15.
