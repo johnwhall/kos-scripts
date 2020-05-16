@@ -66,7 +66,6 @@ wait until propellantStable().
 print "SECOND STAGE".
 set ship:control:pilotmainthrottle to 1.
 stage. // ignite 2nd stage
-set ship:control:fore to 0.
 
 wait until currentThrust() > 0.95 * ship:availableThrust.
 

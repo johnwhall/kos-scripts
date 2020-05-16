@@ -7,18 +7,19 @@ runoncepath("lib/libmath").
 //       But if there is a temporary increase for some reason, that would be bad, too.
 //       So just wait until abs diff is small enough, then snap?
 //       But if update rate is slow, we might jump past small abs diffs.
+//       So wait until curAbsDiff > 2*minAbsDiff
 //       Also, we might overshoot if the heading difference at flip is far from the heading calculated from the target inclination,
 //       so maybe switch to a PID controller once abs diff gets to a certain amount, but then how to tune?
 function HeadingPicker {
-  parameter launchAzimuth, tgtInc.
+  parameter laz, tgtInc.
 
   local this to lexicon().
-  set this:launchAzimuth to launchAzimuth.
+  set this:laz to laz.
   set this:tgtInc to tgtInc.
   set this:incFlipped to false.
   set this:initialSign to sign(ship:orbit:inclination - this:tgtInc).
 
-  print "launchAzimuth: " + this:launchAzimuth + " tgtInc: " + this:tgtInc + " initialSign: " + this:initialSign.
+  print "laz: " + this:laz + " tgtInc: " + this:tgtInc + " initialSign: " + this:initialSign.
 
   set this:pick to {
     if this:incFlipped { return this:pickFromTargetInclination(). }
@@ -28,13 +29,23 @@ function HeadingPicker {
       print "FLIPPED!".
       return this:pickFromTargetInclination().
     } else {
-      return this:launchAzimuth.
+      return this:laz.
     }
   }.
 
   set this:pickFromTargetInclination to {
-    return this:launchAzimuth.
+    return this:laz.
   }.
 
   return this.
+}
+
+function launchAzimuth {
+  parameter tgtInc, tgtAlt.
+
+  // Source: http://www.orbiterwiki.org/wiki/Launch_Azimuth
+  local betaInertial to arcsin(clamp(cos(tgtInc) / cos(ship:latitude), -1, 1)).
+  local vEqRot to 2 * constant:pi * body:radius / body:rotationPeriod.
+  local vOrbit to sqrt(body:mu / (body:radius + tgtAlt)).
+  return arctan((vOrbit * sin(betaInertial) -  vEqRot * cos(ship:latitude)) / (vOrbit * cos(betaInertial))).
 }
