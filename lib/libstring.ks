@@ -128,3 +128,12 @@ function formatDecimal {
 
   return out.
 }
+
+// TODO: test
+function formatVector {
+  parameter v, wholePlaces is 0, decimalPlaces is 0, maxDecimalPlaces is -1.
+  local vx to formatDecimal(v:x, wholePlaces, decimalPlaces, maxDecimalPlaces).
+  local vy to formatDecimal(v:y, wholePlaces, decimalPlaces, maxDecimalPlaces).
+  local vz to formatDecimal(v:z, wholePlaces, decimalPlaces, maxDecimalPlaces).
+  return "V(" + vx + ", " + vy + ", " + vz + ")".
+}

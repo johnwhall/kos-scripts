@@ -5,20 +5,20 @@ runoncepath("lib/libengine").
 runoncepath("lib/libfacing").
 runoncepath("lib/liblaunch").
 
-//local lanDiff to 170 - ship:orbit:lan.
-//if lanDiff < 0 { set lanDiff to 360 + lanDiff. }
-//local waitTime to (lanDiff / 360) * body:rotationPeriod.
-//kUniverse:timeWarp:warpTo(time:seconds + waitTime).
-//
-//wait until kUniverse:timeWarp:rate = 1 and kUniverse:timeWarp:isSettled.
-//wait 5. // TODO: why isn't the above line enough
+local lanDiff to moon:orbit:lan - ship:orbit:lan.
+if lanDiff < 0 { set lanDiff to 360 + lanDiff. }
+local waitTime to (lanDiff / 360) * body:rotationPeriod.
+kUniverse:timeWarp:warpTo(time:seconds + waitTime).
+
+wait until kUniverse:timeWarp:rate = 1 and kUniverse:timeWarp:isSettled.
+wait 5. // TODO: why isn't the above line enough
 
 local tgtInc to ship:latitude.
 local laz to launchAzimuth(tgtInc, 200000).
 print "Launch azimuth: " + round(laz, 2).
 
 local gtPitch0 to 80.
-local gtSpd0 to 73.
+local gtSpd0 to 67.
 local gtSpdf to gtSpd0 + 50.
 
 local rollControl to false. // TODO: until I figure out how to keep roll steady
@@ -36,6 +36,10 @@ wait until currentThrust() > 0.95 * ship:availableThrust.
 print "LAUNCH".
 stage. // disconnect launch clamp
 
+local upVecDraw to vecDraw(ship:position, { return 20 * ship:up:vector. }, white, "", 1, true).
+local steeringVecDraw to vecDraw(ship:position, { return 20 * toVector(steering). }, blue, "", 1, true).
+local horizonVecDraw to vecDraw(ship:position, { return 20 * horizon(). }, red, "", 1, true).
+
 wait until ship:verticalspeed > gtSpd0.
 print "GRAVITY TURN INITIAL".
 lock steering to lookDirUp(heading(laz, lerp(90, gtPitch0, ship:verticalSpeed, gtSpd0, gtSpdf, true)):vector, tgtTopVec).
@@ -52,26 +56,17 @@ print "COAST".
 wait until ship:altitude > 100000.
 set ship:control:pilotmainthrottle to 0.
 stage. // decouple 1st stage & fairings
-
-// Wait until we leave the atmosphere or else we'll waste RCS fighting it
-wait until ship:altitude > body:atm:height.
-
 rcs on.
 //lock steering to lookDirUp(heading(headPicker:pick(), 0):vector, tgtTopVec).
 lock steering to lookDirUp(heading(head(ship, ship:velocity:orbit), 0):vector, tgtTopVec).
 
 wait until angleToSteering() < 0.25.
 
-local circBurnTime to ttab(267, 33).
-
-//local cirBurnDuration to 120.
-//local circBurnTime to time:seconds + eta:apoapsis - 75. //cirBurnDuration / 2.
-
 // cancel manual timewarp
-wait until time:seconds > circBurnTime - 15.
+wait until eta:apoapsis < 120.
 set warp to 0.
 
-wait until time:seconds > circBurnTime - 5.
+wait until eta:apoapsis < 105.
 print "PROPELLANT STABILIZE".
 set ship:control:fore to 1.
 
@@ -84,8 +79,9 @@ set ship:control:fore to 0.
 wait until currentThrust() > 0.95 * ship:availableThrust.
 
 local minEcc to ship:orbit:eccentricity.
-until ship:orbit:eccentricity > 1.1 * minEcc { set minEcc to min(minEcc, ship:orbit:eccentricity). }
+until ship:orbit:eccentricity > 2 * minEcc { set minEcc to min(minEcc, ship:orbit:eccentricity). }
 
 set ship:control:pilotmainthrottle to 0.
 set ship:control:neutralize to true.
+clearVecDraws().
 print "ORBIT".
