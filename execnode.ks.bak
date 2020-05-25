@@ -1,0 +1,48 @@
+@lazyglobal off.
+
+runoncepath("lib/libengine").
+runoncepath("lib/libfacing").
+
+local isp to 235.4.
+local T to 13.763.
+local m to 0.347.
+local bt to burnTime(nextNode:deltaV:mag, isp, T, m). // TODO: temporary
+
+set steeringManager:maxStoppingTime to 5.
+set steeringManager:pitchPID:kd to 1.
+set steeringManager:yawPID:kd to 1.
+
+local burnMidTime to time:seconds + nextNode:eta.
+local burnStartTime to burnMidTime - bt / 2.
+local propStabTime to burnStartTime - 5.
+local rollStabTime to propStabTime - 10.
+local turnStartTime to rollStabTime - 120.
+
+// cancel manual timewarp
+wait until time:seconds > turnStartTime - 20.
+set warp to 0.
+
+wait until time:seconds > turnStartTime.
+print "Turning to node".
+rcs on.
+lock steering to nextNode:deltaV.
+wait until angleToSteering() < 0.25. // TODO: also wait for roll
+
+wait until time:seconds > rollStabTime.
+set ship:control:roll to 1.
+
+wait until time:seconds > propStabTime.
+print "Stabilizing propellant".
+set ship:control:fore to 1.
+wait until propellantStable().
+
+print "Starting burn".
+stage. // TODO: temporary
+set ship:control:pilotmainthrottle to 1.
+
+wait until currentThrust() > 0.95 * ship:availableThrust.
+local minDV to nextNode:deltaV:mag.
+until nextNode:deltaV:mag > 1.1 * minDV { set minDV to min(minDV, nextNode:deltaV:mag). }
+
+set ship:control:pilotmainthrottle to 0.
+set ship:control:neutralize to true.

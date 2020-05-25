@@ -5,20 +5,29 @@ runoncepath("lib/libengine").
 runoncepath("lib/libfacing").
 runoncepath("lib/liblaunch").
 
-//local lanDiff to 170 - ship:orbit:lan.
+//runoncepath("lib/libstring").
+//local LOGFILE to "log/launch.log".
+//if exists(LOGFILE) { deletepath(LOGFILE). }
+//local initialAltitude to ship:altitude.
+//function logHeader { log join(" ", list("T(s)", "alt(m)", "mass(t)", "pitch(deg)", "thrust(kN)", "vSrf(m/s)", "vObt(m/s)", "vVert(m/s)", "vHorz(m/s)")) to LOGFILE.  }
+//function logInfo { log (missiontime + " " + (altitude - initialAltitude) + " " + mass + " " + pitch() + " " + ship:availablethrust + " " + velocity:surface:mag + " " + velocity:orbit:mag + " " + verticalSpeed + " " + groundSpeed) to LOGFILE.  }
+//logHeader().
+
+//local tgtLAN to 0.
+//local lanDiff to tgtLan - ship:orbit:lan.
 //if lanDiff < 0 { set lanDiff to 360 + lanDiff. }
 //local waitTime to (lanDiff / 360) * body:rotationPeriod.
 //kUniverse:timeWarp:warpTo(time:seconds + waitTime).
-//
 //wait until kUniverse:timeWarp:rate = 1 and kUniverse:timeWarp:isSettled.
-//wait 5. // TODO: why isn't the above line enough
+//wait 3. // TODO: why isn't the above line enough
+//if abs(tgtLan - ship:orbit:lan) > 2 { print "warp to lan failed". exit. }
 
 local tgtInc to ship:latitude.
 local laz to launchAzimuth(tgtInc, 200000).
 print "Launch azimuth: " + round(laz, 2).
 
 local gtPitch0 to 80.
-local gtSpd0 to 73.
+local gtSpd0 to 70.
 local gtSpdf to gtSpd0 + 50.
 
 local rollControl to false. // TODO: until I figure out how to keep roll steady
@@ -30,6 +39,14 @@ sas off.
 rcs off.
 set ship:control:pilotmainthrottle to 1.
 lock steering to lookDirUp(ship:up:vector, tgtTopVec).
+
+//wait 0.001.
+//on missiontime {
+//  logInfo().
+//  return true.
+//}
+//wait 0.001.
+
 stage. // ignite engine
 
 wait until currentThrust() > 0.95 * ship:availableThrust.
@@ -48,22 +65,28 @@ local headPicker to HeadingPicker(laz, tgtInc).
 lock steering to lookDirUp(heading(headPicker:pick(), pitch(ship, ship:velocity:surface)):vector, tgtTopVec).
 
 wait until currentThrust() <= 0.01 * ship:availableThrust. // MECO
-print "COAST".
-wait until ship:altitude > 100000.
 set ship:control:pilotmainthrottle to 0.
+print "COAST".
+
+wait until ship:altitude > 100000.
 stage. // decouple 1st stage & fairings
-
-// Wait until we leave the atmosphere or else we'll waste RCS propellant fighting it
-wait until ship:altitude > body:atm:height.
-
-rcs on.
 //lock steering to lookDirUp(heading(headPicker:pick(), 0):vector, tgtTopVec).
 lock steering to lookDirUp(heading(head(ship, ship:velocity:orbit), 0):vector, tgtTopVec).
 
-local cbt0 to time:seconds.
-local circBurnTime to calcCircBurnTime(267, 33).
-local cbtf to time:seconds.
-print "circBurnTime took " + round(cbtf - cbt0, 2) + " seconds".
+when ship:altitude > body:atm:height then {
+  // Do this after we leave the atmosphere or else we'll waste RCS propellant fighting it
+  rcs on.
+}
+
+local vCirc to sqrt(body:mu / (body:radius + apoapsis)).
+local vApo to sqrt(body:mu * (2 / (body:radius + apoapsis) - 1 / orbit:semiMajorAxis)).
+local circDV to vCirc - vApo.
+local circBurnTime to time:seconds + eta:apoapsis - burnTime(circDV / 2, 267, 33).
+
+//local cbt0 to time:seconds.
+//local circBurnTime to calcCircBurnTime(267, 33).
+//local cbtf to time:seconds.
+//print "circBurnTime took " + round(cbtf - cbt0, 2) + " seconds (done at T+" + round(missiontime, 2) + " alt: " + round(ship:altitude) + ")".
 
 wait until angleToSteering() < 0.25.
 

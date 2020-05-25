@@ -19,7 +19,7 @@ function timeToPeriapsis {
   return timeToMeanAnomaly(0, obt, tm).
 }
 
-// TODO: parabolic/hyperbolic orbits
+// TODO: parabolic/hyperbolic orbits  (?? :))
 function timeToApoapsis {
   parameter obt is ship:orbit, tm is time:seconds.
   return timeToMeanAnomaly(180, obt, tm).
