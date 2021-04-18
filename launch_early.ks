@@ -13,14 +13,14 @@ runoncepath("lib/liblaunch").
 //function logInfo { log (missiontime + " " + (altitude - initialAltitude) + " " + mass + " " + pitch() + " " + ship:availablethrust + " " + velocity:surface:mag + " " + velocity:orbit:mag + " " + verticalSpeed + " " + groundSpeed) to LOGFILE.  }
 //logHeader().
 
-//local tgtLAN to 0.
-//local lanDiff to tgtLan - ship:orbit:lan.
-//if lanDiff < 0 { set lanDiff to 360 + lanDiff. }
-//local waitTime to (lanDiff / 360) * body:rotationPeriod.
-//kUniverse:timeWarp:warpTo(time:seconds + waitTime).
-//wait until kUniverse:timeWarp:rate = 1 and kUniverse:timeWarp:isSettled.
-//wait 3. // TODO: why isn't the above line enough
-//if abs(tgtLan - ship:orbit:lan) > 2 { print "warp to lan failed". exit. }
+local tgtLAN to 0.
+local lanDiff to tgtLan - ship:orbit:lan.
+if lanDiff < 0 { set lanDiff to 360 + lanDiff. }
+local waitTime to (lanDiff / 360) * body:rotationPeriod.
+kUniverse:timeWarp:warpTo(time:seconds + waitTime).
+wait until kUniverse:timeWarp:rate = 1 and kUniverse:timeWarp:isSettled.
+wait 3. // TODO: why isn't the above line enough
+if abs(tgtLan - ship:orbit:lan) > 2 { print "warp to lan failed". exit. }
 
 local tgtInc to ship:latitude.
 local laz to launchAzimuth(tgtInc, 200000).
